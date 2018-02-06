@@ -1,0 +1,4 @@
+sceneSetups:
+- path: Assets/ASL/Scenes/PC.unity
+  isLoaded: 1
+  isActive: 1
