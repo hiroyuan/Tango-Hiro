@@ -1,0 +1,6 @@
+[submodule "Assets/ASL"]
+	path = Assets/ASL
+	url = https://github.com/UWB-ARSandbox/ASL
+[submodule "Assets/Resources[UWB]"]
+	path = Assets/Resources[UWB]
+	url = https://github.com/UWB-ARSandbox/Resources
