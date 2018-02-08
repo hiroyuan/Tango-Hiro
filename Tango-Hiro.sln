@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2017
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tango-Hiro", "Tango-Hiro.csproj", "{7DA12C22-0DF1-A57A-89FC-5DE5D16D86DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tango-Hiro.Editor", "Tango-Hiro.Editor.csproj", "{ACDC4B31-BF66-D6D2-A21E-AA693E13C5D2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7DA12C22-0DF1-A57A-89FC-5DE5D16D86DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DA12C22-0DF1-A57A-89FC-5DE5D16D86DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DA12C22-0DF1-A57A-89FC-5DE5D16D86DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DA12C22-0DF1-A57A-89FC-5DE5D16D86DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ACDC4B31-BF66-D6D2-A21E-AA693E13C5D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACDC4B31-BF66-D6D2-A21E-AA693E13C5D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACDC4B31-BF66-D6D2-A21E-AA693E13C5D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACDC4B31-BF66-D6D2-A21E-AA693E13C5D2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
