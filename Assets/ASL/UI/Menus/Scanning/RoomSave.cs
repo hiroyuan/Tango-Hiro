@@ -78,6 +78,11 @@ namespace ASL.UI.Menus.Scanning
         /// This variable holds combined meshes
         /// </summary>
         public GameObject newRoom;
+
+        /// <summary>
+        /// This variable is used for drawing bounding box
+        /// </summary>
+        public Bounds bounds;
         #endregion
 
         #region Methods
@@ -117,7 +122,10 @@ namespace ASL.UI.Menus.Scanning
                     UnloadRoom(directoryInfoList[selected]);
 
                 if (GUI.Button(new Rect(10, 185, position.width - 20, 20), "Reconstruct Selected Room"))
-                    combineMeshesForSelectedRoom();
+                {
+                    //combineMeshesForSelectedRoom();
+                    bounds = calcBoundingBox(roomList);
+                }
             }
 
             // Create a delete all button
@@ -125,6 +133,11 @@ namespace ASL.UI.Menus.Scanning
                 deleteAllRooms();
 
             Repaint();
+        }
+
+        public List<GameObject> GetList()
+        {
+            return roomList;
         }
 
         /// <summary>
@@ -551,6 +564,90 @@ namespace ASL.UI.Menus.Scanning
             {
                 Destroy(g);
             }
+        }
+
+        private void combineVertices()
+        {
+            List<Vector3[]> totalVertices = new List<Vector3[]>();
+            foreach (GameObject g in roomList)
+            {
+                totalVertices.Add(g.GetComponent<MeshFilter>().sharedMesh.vertices);
+            }
+            int[] triangle = new int[totalVertices.Count * 3];
+        }
+
+        private Bounds calcBoundingBox(List<GameObject> l)
+        {
+            if (l.Count == 0 || l == null)
+                return new Bounds(Vector3.zero, Vector3.one);
+
+            // Initialize 8 points
+            float minX = Mathf.Infinity;
+            float maxX = -Mathf.Infinity;
+            float minY = Mathf.Infinity;
+            float maxY = -Mathf.Infinity;
+            float minZ = Mathf.Infinity;
+            float maxZ = -Mathf.Infinity;
+
+            Vector3[] points = new Vector3[8];
+
+            foreach(GameObject g in l)
+            {
+                getBoundsPointsNoAlloc(g, points);
+                foreach (Vector3 v in points)
+                {
+                    if (v.x < minX)
+                        minX = v.x;
+                    if (v.x > maxX)
+                        maxX = v.x;
+                    if (v.y < minY)
+                        minY = v.y;
+                    if (v.y > maxY)
+                        maxY = v.y;
+                    if (v.z < minZ)
+                        minZ = v.z;
+                    if (v.z > maxZ)
+                        maxZ = v.z;
+                }
+            }
+
+            float sizeX = maxX - minX;
+            float sizeY = maxY - minY;
+            float sizeZ = maxZ - minZ;
+
+            Vector3 center = new Vector3(minX + sizeX / 2.0f, minY + sizeY / 2.0f, minZ + sizeZ / 2.0f);
+
+            return new Bounds(center, new Vector3(sizeX, sizeY, sizeX));
+        }
+
+        private void getBoundsPointsNoAlloc(GameObject g, Vector3[] p)
+        {
+            if (p == null || p.Length == 0)
+            {
+                UnityEngine.Debug.Log("Invalid Array");
+                return;
+            }
+            MeshFilter filter = g.GetComponent<MeshFilter>();
+            if (filter == null)
+            {
+                UnityEngine.Debug.Log("No MeshFilter on game object");
+                for (int i = 0; i < p.Length; i++)
+                    p[i] = g.transform.position;
+                return;
+            }
+
+            Transform transform = g.transform;
+            Vector3 v3Center = filter.mesh.bounds.center;
+            Vector3 v3ext = filter.mesh.bounds.extents;
+
+            p[0] = transform.TransformPoint(new Vector3(v3Center.x - v3ext.x, v3Center.y + v3ext.y, v3Center.z - v3ext.z)); // Front top left corner
+            p[1] = transform.TransformPoint(new Vector3(v3Center.x + v3ext.x, v3Center.y + v3ext.y, v3Center.z - v3ext.z)); // Front top right corner
+            p[2] = transform.TransformPoint(new Vector3(v3Center.x - v3ext.x, v3Center.y - v3ext.y, v3Center.z - v3ext.z)); // Front bottom left corner
+            p[3] = transform.TransformPoint(new Vector3(v3Center.x + v3ext.x, v3Center.y - v3ext.y, v3Center.z - v3ext.z)); // Front bottom right corner
+            p[4] = transform.TransformPoint(new Vector3(v3Center.x - v3ext.x, v3Center.y + v3ext.y, v3Center.z + v3ext.z)); // Back top left corner
+            p[5] = transform.TransformPoint(new Vector3(v3Center.x + v3ext.x, v3Center.y + v3ext.y, v3Center.z + v3ext.z)); // Back top right corner
+            p[6] = transform.TransformPoint(new Vector3(v3Center.x - v3ext.x, v3Center.y - v3ext.y, v3Center.z + v3ext.z)); // Back bottom left corner
+            p[7] = transform.TransformPoint(new Vector3(v3Center.x + v3ext.x, v3Center.y - v3ext.y, v3Center.z + v3ext.z)); // Back bottom right corner
         }
 
         /// <summary>

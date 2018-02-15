@@ -9,7 +9,8 @@ namespace UWBNetworkingPackage
     public class RoomManager : MonoBehaviour
     {
         public string RoomName;
-
+        public Bounds bounds;
+        public ASL.UI.Menus.Scanning.RoomSave rs;
         public static class Messages
         {
             public static class Errors
@@ -27,6 +28,8 @@ namespace UWBNetworkingPackage
             }
 
             InvokeRepeating("UpdateRoomBundles", 0, 3);
+            rs = ScriptableObject.CreateInstance("ASL.UI.Menus.Scanning.RoomSave") as ASL.UI.Menus.Scanning.RoomSave;
+            bounds = rs.bounds;
         }
 
         void FixedUpdate()
@@ -40,6 +43,11 @@ namespace UWBNetworkingPackage
                 //string directoryPath = UWB_Texturing.Config.RoomObject.CompileAbsoluteAssetDirectory(RoomName);
                 AbnormalDirectoryHandler.CreateDirectory(directoryPath);
             }
+        }
+
+        void OnDrawGizmos()
+        {
+            Gizmos.DrawCube(bounds.center, bounds.size);
         }
 
         public void SyncDisplayedRoomName()
