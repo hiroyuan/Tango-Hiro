@@ -7,19 +7,17 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{7DA12C22-0DF1-A57A-89FC-5DE5D16D86DB}</ProjectGuid>
     <OutputType>Library</OutputType>
-    <AssemblyName>Assembly-CSharp.dll</AssemblyName>
+    <AssemblyName>Assembly-CSharp</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{E097FAD1-6243-4DAD-9C02-E9B9EFC3FFC1};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile>
-    </CompilerResponseFile>
+    <CompilerResponseFile></CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows:5</UnityBuildTarget>
     <UnityVersion>5.6.5f1</UnityVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <LangVersion>4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -86,12 +84,6 @@
     </Reference>
     <Reference Include="UnityEditor">
       <HintPath>C:/Program Files/Unity/Editor/Data/Managed/UnityEditor.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil">
-      <HintPath>C:/Program Files/Unity/Editor/Data/Managed/Mono.Cecil.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEditor.iOS.Extensions.Xcode">
-      <HintPath>C:/Program Files/Unity/Editor/Data/PlaybackEngines/AppleTVSupport/UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor.iOS.Extensions.Xcode">
       <HintPath>C:/Program Files/Unity/Editor/Data/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
@@ -773,6 +765,7 @@
     <Compile Include="Assets\ASL\UWBNetworkingPackage\Scripts\Launcher.cs" />
     <Compile Include="Assets\ASL\UWBNetworkingPackage\Scripts\MasterClientLauncher.cs" />
     <Compile Include="Assets\ASL\UWBNetworkingPackage\Scripts\MeshCombiner.cs" />
+    <Compile Include="Assets\ASL\UWBNetworkingPackage\Scripts\MeshHolder.cs" />
     <Compile Include="Assets\ASL\UWBNetworkingPackage\Scripts\NetworkManager.cs" />
     <Compile Include="Assets\ASL\UWBNetworkingPackage\Scripts\ObjectInfoDatabase.cs" />
     <Compile Include="Assets\ASL\UWBNetworkingPackage\Scripts\ObjectInfoMetadata.cs" />

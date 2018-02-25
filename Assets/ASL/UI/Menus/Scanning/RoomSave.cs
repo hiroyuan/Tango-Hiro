@@ -83,6 +83,14 @@ namespace ASL.UI.Menus.Scanning
         /// This variable is used for drawing bounding box
         /// </summary>
         public Bounds bounds;
+        MeshHolder meshHolder;
+        List<Vector3> totalVertices = new List<Vector3>();
+        List<Vector3> totalNormals = new List<Vector3>();
+        List<Color32> totalColors = new List<Color32>();
+        List<int> totalTriangleIndices = new List<int>();
+        List<Vector2> totalUVs = new List<Vector2>();
+        List<Vector2> totalUV2s = new List<Vector2>();
+
         #endregion
 
         #region Methods
@@ -124,7 +132,8 @@ namespace ASL.UI.Menus.Scanning
                 if (GUI.Button(new Rect(10, 185, position.width - 20, 20), "Reconstruct Selected Room"))
                 {
                     //combineMeshesForSelectedRoom();
-                    bounds = calcBoundingBox(roomList);
+                    //bounds = calcBoundingBox(roomList);
+                    combineMeshes();
                 }
             }
 
@@ -566,16 +575,6 @@ namespace ASL.UI.Menus.Scanning
             }
         }
 
-        private void combineVertices()
-        {
-            List<Vector3[]> totalVertices = new List<Vector3[]>();
-            foreach (GameObject g in roomList)
-            {
-                totalVertices.Add(g.GetComponent<MeshFilter>().sharedMesh.vertices);
-            }
-            int[] triangle = new int[totalVertices.Count * 3];
-        }
-
         private Bounds calcBoundingBox(List<GameObject> l)
         {
             if (l.Count == 0 || l == null)
@@ -698,6 +697,44 @@ namespace ASL.UI.Menus.Scanning
                 Destroy(g);
             }
 
+        }
+
+        private void combineMeshes()
+        {
+            int arrayCount = 0;
+            foreach(GameObject g in roomList)
+            {
+                meshHolder = new MeshHolder(g);
+                totalVertices.AddRange(meshHolder.GetVertices());
+                totalNormals.AddRange(meshHolder.GetNormals());
+                totalColors.AddRange(meshHolder.GetColors());
+
+                int[] tempIndex = meshHolder.GetTriangleIndices();
+                int[] tempIndex2 = new int[tempIndex.Length];
+                for (int i = 0; i < tempIndex.Length; i++)
+                {
+                    tempIndex2[i] = tempIndex[i] + arrayCount;
+                }
+                totalTriangleIndices.AddRange(tempIndex2);
+                arrayCount = arrayCount + meshHolder.GetVertices().Length;
+
+                totalUVs.AddRange(meshHolder.GetUVs());
+                totalUV2s.AddRange(meshHolder.GetUV2s());
+            }
+
+            GameObject newGameObject = new GameObject();
+            Mesh mesh = new Mesh();
+            MeshFilter mf = newGameObject.AddComponent<MeshFilter>();
+            MeshRenderer mr = newGameObject.AddComponent<MeshRenderer>();
+
+            mesh.vertices = totalVertices.ToArray();
+            mesh.normals = totalNormals.ToArray();
+            mesh.colors32 = totalColors.ToArray();
+            mesh.triangles = totalTriangleIndices.ToArray();
+            mesh.uv = totalUVs.ToArray();
+
+            mf.mesh = mesh;
+            mr.material = new Material(Shader.Find("Transparent/Diffuse"));
         }
 #endregion
 #endregion
