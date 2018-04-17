@@ -83,6 +83,22 @@ namespace ASL.UI.Menus.Scanning
         /// This variable is used for drawing bounding box
         /// </summary>
         public Bounds bounds;
+        public Bounds[] subBounds;
+        public Mesh mesh;
+        private int xDirCount = 2;
+        private int yDirCount = 1;
+        private int zDirCount = 1;
+        private List<Vector3> partialVertices = new List<Vector3>();
+        private List<Vector3> partialNormals = new List<Vector3>();
+        private List<Color> partialColors = new List<Color>();
+        private List<int> partialTriangles = new List<int>();
+        private List<Vector2> partialUVs = new List<Vector2>();
+        public List<GameObject> list = new List<GameObject>();
+        public Transform trans;
+
+        // key = old vertex index, value = new vertex index
+        public Dictionary<int, int> oldVertexIndices2newVertexIndices = new Dictionary<int, int>();
+
         MeshHolder meshHolder;
         List<Vector3> totalVertices = new List<Vector3>();
         List<Vector3> totalNormals = new List<Vector3>();
@@ -129,16 +145,29 @@ namespace ASL.UI.Menus.Scanning
                 if (GUI.Button(new Rect(10, 160, position.width - 20, 20), "Unload Selected Room"))
                     UnloadRoom(directoryInfoList[selected]);
 
-                if (GUI.Button(new Rect(10, 185, position.width - 20, 20), "Reconstruct Selected Room"))
+                if (GUI.Button(new Rect(10, 185, position.width - 20, 20), "Select Mesh and Split"))
                 {
-                    //combineMeshesForSelectedRoom();
-                    //bounds = calcBoundingBox(roomList);
-                    combineMeshes();
+                    selectMesh();
+                    splitBounds();
+                    splitMesh();
+                }
+
+                if (GUI.Button(new Rect(10, 210, position.width - 20, 20), "Save New Mesh"))
+                {
+                    roomList.Clear();
+                    UnityEngine.Debug.Log("length of subBounds: " + subBounds.Length);
+                    for (int i = 0; i < subBounds.Length; i++)
+                    {
+                        GameObject g = GameObject.Find("NewMesh" + i);
+                        
+                        roomList.Add(g);
+                        SaveRooms(roomList, directoryInfoList);
+                    }
                 }
             }
 
             // Create a delete all button
-            if (GUI.Button(new Rect(10, 225, position.width - 20, 20), "Delete All Rooms"))
+            if (GUI.Button(new Rect(10, 235, position.width - 20, 20), "Delete All Rooms"))
                 deleteAllRooms();
 
             Repaint();
@@ -190,7 +219,7 @@ namespace ASL.UI.Menus.Scanning
                 //UnityEngine.Debug.Log(root.FullName + '\\' + RoomName + '\\' + room.name);
                 //File.WriteAllBytes(root.FullName + '\\' + RoomName + '\\' + room.name, b);
                 File.WriteAllBytes(filepath, b);
-
+                UnityEngine.Debug.Log(filepath);
 #if UNITY_EDITOR
                 UnityEditor.AssetDatabase.Refresh();
 #endif
@@ -296,6 +325,7 @@ namespace ASL.UI.Menus.Scanning
 
             // Get all game objects with the "Room" tag
             RegisterAllTangoRooms();
+
         }
 
         private void Reset()
@@ -736,8 +766,218 @@ namespace ASL.UI.Menus.Scanning
             mf.mesh = mesh;
             mr.material = new Material(Shader.Find("Transparent/Diffuse"));
         }
-#endregion
-#endregion
+
+        private void splitBounds()
+        {
+            float sizeX = (bounds.max.x - bounds.min.x) / xDirCount;
+            float sizeY = (bounds.max.y - bounds.min.y) / yDirCount;
+            float sizeZ = (bounds.max.z - bounds.min.z) / zDirCount;
+            Vector3 subSize = new Vector3(sizeX, sizeY, sizeZ);
+
+            Vector3 subCenter;
+            int index = 0;
+            float xStartPoint = bounds.min.x;
+            float yStartPoint = bounds.min.y;
+            float zStartPoint = bounds.min.z;
+            for (int i = 0; i < xDirCount; i++)
+            {
+                for (int j = 0; j < yDirCount; j++)
+                {
+                    for (int k = 0; k < zDirCount; k++)
+                    {
+                        subCenter = new Vector3(xStartPoint + sizeX / 2, yStartPoint + sizeY / 2, zStartPoint + sizeZ / 2);
+                        subBounds[index++] = new Bounds(subCenter, subSize);
+                        zStartPoint += sizeZ;
+                    }
+                    zStartPoint = bounds.min.z;
+                    yStartPoint += sizeY;
+                }
+                zStartPoint = bounds.min.z;
+                yStartPoint = bounds.min.y;
+                xStartPoint += sizeX;
+            }
         }
+
+        private void selectMesh()
+        {
+            list.Clear();
+            GameObject g = GameObject.Find("3_12_4_2017_11_23_11_AM");
+            if (g != null)
+            {
+                list.Add(g);
+                UnityEngine.Debug.Log("list count: " + list.Count());
+                bounds = calcBoundingBox(list);
+                subBounds = new Bounds[xDirCount * yDirCount * zDirCount];
+                mesh = g.GetComponent<MeshFilter>().mesh;
+                trans = g.transform;
+            }
+        }
+
+        private void splitMesh()
+        {
+            for (int i = 0; i < subBounds.Length; i++)
+            {
+                //foreach (GameObject g in list) trans = g.transform;
+
+                Vector3[] worldPointVertices = transformToWorldPoint(mesh.vertices);
+                for (int index = 0; index < worldPointVertices.Length; index++)
+                {
+                    if (subBounds[i].Contains(worldPointVertices[index]))
+                    {
+                        if (index < mesh.colors.Length) partialColors.Add(mesh.colors[index]);
+                        if (index < mesh.uv.Length) partialUVs.Add(mesh.uv[index]);
+
+                        partialVertices.Add(mesh.vertices[index]);
+                        partialNormals.Add(mesh.normals[index]);
+                        //partialUVs.Add(mesh.uv[index]);
+                    }
+                }
+
+                Vector3[] worldPointPartialVertices = transformToWorldPoint(partialVertices.ToArray());
+                List<int> triangles = trianglesToUse(mesh.triangles, partialVertices);
+                for (int index = 0; index < worldPointVertices.Length; index++)
+                {
+                    for (int newIndex = 0; newIndex < worldPointPartialVertices.Length; newIndex++)
+                    {
+                        if (worldPointVertices[index] == worldPointPartialVertices[newIndex] && !oldVertexIndices2newVertexIndices.ContainsKey(index))
+                            oldVertexIndices2newVertexIndices.Add(index, newIndex);
+                    }
+                }
+                partialTriangles = transTriangle2newVertexIndices(triangles);
+
+                drawNewMesh(i);
+                clearArraysAndDic();
+            }
+            UnityEngine.Debug.Log("Split done");
+        }
+
+        /// <summary>
+        /// This function figures out which triangle to use for split mesh.
+        /// First, this function iterates through whole triangle array, and check each vertex shown in the triangle
+        /// list to see if its in bounds or not. Then, it adds triangle to a new list if it is inside of the active
+        /// bound.
+        /// </summary>
+        /// <param name="originalTriArray"></param>
+        /// <param name="vertices"></param>
+        /// <returns></returns>
+        private List<int> trianglesToUse(int[] originalTriArray, List<Vector3> vertices)
+        {
+            List<int> trianglesToKeep = new List<int>();
+            List<int> triangle = new List<int>();
+            for (int i = 0; i < originalTriArray.Length; i += 3)
+            {
+                triangle.Add(originalTriArray[i + 0]);
+                triangle.Add(originalTriArray[i + 1]);
+                triangle.Add(originalTriArray[i + 2]);
+
+                //triangle.Insert(0, originalTriArray[i + 2]);
+                //triangle.Insert(0, originalTriArray[i + 1]);
+                //triangle.Insert(0, originalTriArray[i + 0]);
+
+                for (int triangleIndex = 0; triangleIndex < 3; triangleIndex++)
+                {
+                    int vertexIndex = triangle[originalTriArray[triangleIndex]];
+                    if (vertexIndex >= vertices.Count())
+                        continue;
+                    Vector3 vertex = vertices[vertexIndex];
+                    bool keep = mesh.bounds.Contains(vertex);
+                    if (keep)
+                    {
+                        //trianglesToKeep.AddRange(triangle);
+                        trianglesToKeep.Add(triangle[i + 0]);
+                        trianglesToKeep.Add(triangle[i + 1]);
+                        trianglesToKeep.Add(triangle[i + 2]);
+                        break;
+                    }
+                }
+            }
+
+            return trianglesToKeep;
+        }
+
+        /// <summary>
+        /// This function figures out what indices they correespond to in the new vertex array which is counstructed by other function.
+        /// 
+        /// </summary>
+        /// <param name="originalTriangleList"></param>
+        /// <returns></returns>
+        private List<int> transTriangle2newVertexIndices(List<int> originalTriangleList)
+        {
+            List<int> newTriangleList = new List<int>();
+
+            List<int> triangle = new List<int>();
+            for (int i = 0; i < originalTriangleList.Count; i += 3)
+            {
+                //triangle.Add(originalTriangleList[i + 0]);
+                //triangle.Add(originalTriangleList[i + 1]);
+                //triangle.Add(originalTriangleList[i + 2]);
+                triangle.Insert(0, originalTriangleList[i + 2]);
+                triangle.Insert(0, originalTriangleList[i + 1]);
+                triangle.Insert(0, originalTriangleList[i + 0]);
+
+
+                List<int> newTriangle = new List<int>();
+                for (int tIndex = 0; tIndex < 3; tIndex++)
+                {
+                    int oldVertexIndex = triangle[tIndex];
+                    if (!oldVertexIndices2newVertexIndices.ContainsKey(oldVertexIndex))
+                        break;
+                    int newVertexIndex = oldVertexIndices2newVertexIndices[oldVertexIndex];
+                    newTriangle.Add(newVertexIndex);
+                }
+                newTriangleList.AddRange(newTriangle);
+            }
+            return newTriangleList;
+        }
+
+        private void writeNewTriArray(List<int> newTriangleList, Mesh m)
+        {
+            m.SetTriangles(newTriangleList.ToArray(), 0);
+        }
+
+        private void clearArraysAndDic()
+        {
+            partialVertices.Clear();
+            partialNormals.Clear();
+            partialColors.Clear();
+            partialUVs.Clear();
+            partialTriangles.Clear();
+            oldVertexIndices2newVertexIndices.Clear();
+        }
+
+        private Vector3[] transformToWorldPoint(Vector3[] array)
+        {
+            Vector3[] worldPosArray = new Vector3[array.Length];
+            for (int index = 0; index < array.Length; index++)
+            {
+                worldPosArray[index] = trans.TransformPoint(array[index]);
+            }
+
+            return worldPosArray;
+        }
+
+        private void drawNewMesh(int index)
+        {
+            GameObject newGameObject = new GameObject();
+            MeshFilter mf = newGameObject.AddComponent<MeshFilter>();
+            mf.name = "NewMesh" + index;
+            MeshRenderer mr = newGameObject.AddComponent<MeshRenderer>();
+            Mesh m = new Mesh();
+
+            m.vertices = partialVertices.ToArray();
+            m.normals = partialNormals.ToArray();
+            m.colors = partialColors.ToArray();
+            m.uv = partialUVs.ToArray();
+            //m.triangles = partialTriangles.ToArray();
+            writeNewTriArray(partialTriangles, m);
+
+            mf.mesh = m;
+            mr.material = new Material(Shader.Find("Transparent/Diffuse"));
+
+            //AssetDatabase.CreateAsset(mr.material, "Assets/File/" + mf.name + ".mat");
+        }
+        #endregion
+        #endregion
+    }
 #endif
 }
