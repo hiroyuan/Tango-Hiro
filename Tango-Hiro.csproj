@@ -742,7 +742,15 @@
     <Compile Include="Assets\ASL\UI\Menus\Networking\DemoSceneLoader.cs" />
     <Compile Include="Assets\ASL\UI\Menus\Networking\PlatformSelector.cs" />
     <Compile Include="Assets\ASL\UI\Menus\Networking\SceneVariableSetter.cs" />
+    <Compile Include="Assets\ASL\UI\Menus\Scanning\BoundHolder.cs" />
+    <Compile Include="Assets\ASL\UI\Menus\Scanning\BoundingBoxSystem.cs" />
+    <Compile Include="Assets\ASL\UI\Menus\Scanning\Controller.cs" />
+    <Compile Include="Assets\ASL\UI\Menus\Scanning\MeshHolder.cs" />
+    <Compile Include="Assets\ASL\UI\Menus\Scanning\MeshSplitterController.cs" />
     <Compile Include="Assets\ASL\UI\Menus\Scanning\RoomSave.cs" />
+    <Compile Include="Assets\ASL\UI\Menus\Scanning\SerializableBounds.cs" />
+    <Compile Include="Assets\ASL\UI\Menus\Scanning\SerializableVector3.cs" />
+    <Compile Include="Assets\ASL\UI\Menus\Scanning\VertexLookUp.cs" />
     <Compile Include="Assets\ASL\UI\Menus\Vive\CustomRadialMenu.cs" />
     <Compile Include="Assets\ASL\UI\Networking\ConnectionNotifier.cs" />
     <Compile Include="Assets\ASL\UWBNetworkingPackage\Scripts\ASLEventCode.cs" />
@@ -765,7 +773,6 @@
     <Compile Include="Assets\ASL\UWBNetworkingPackage\Scripts\Launcher.cs" />
     <Compile Include="Assets\ASL\UWBNetworkingPackage\Scripts\MasterClientLauncher.cs" />
     <Compile Include="Assets\ASL\UWBNetworkingPackage\Scripts\MeshCombiner.cs" />
-    <Compile Include="Assets\ASL\UWBNetworkingPackage\Scripts\MeshHolder.cs" />
     <Compile Include="Assets\ASL\UWBNetworkingPackage\Scripts\NetworkManager.cs" />
     <Compile Include="Assets\ASL\UWBNetworkingPackage\Scripts\ObjectInfoDatabase.cs" />
     <Compile Include="Assets\ASL\UWBNetworkingPackage\Scripts\ObjectInfoMetadata.cs" />
@@ -899,6 +906,7 @@
     <None Include="Assets\ASL\Resources\Rooms\Room2\Room2Mesh.txt" />
     <None Include="Assets\ASL\Resources\Rooms\Room2\Room2Orientation.txt" />
     <None Include="Assets\ASL\Resources\Rooms\TangoDefault\ScannerPlatform.txt" />
+    <None Include="Assets\ASL\Resources\Rooms\Test\ScannerPlatform.txt" />
     <None Include="Assets\ASL\Resources\Rooms\UW1_260\ScannerPlatform.txt" />
     <None Include="Assets\ASL\Resources\Rooms\UW1_302\ScannerPlatform.txt" />
     <None Include="Assets\ASL\Room_Texture\Resources\_Shaders\MyRoomShader.shader" />
