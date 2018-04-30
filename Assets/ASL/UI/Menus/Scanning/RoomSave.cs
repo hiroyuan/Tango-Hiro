@@ -98,12 +98,15 @@ namespace ASL.UI.Menus.Scanning
             if (GUI.Button(new Rect(10, 50, position.width - 20, 20), "Save Rooms"))
                 SaveRooms(roomList, directoryInfoList);
 
+            if (GUI.Button(new Rect(10, 75, position.width - 20, 20), "Save BBox"))
+                SaveBoundingBox();
+
             // If there are directories within the root directory
             if (directoryInfoList.Count > 0)
             {
                 // Create the load lable
                 // GUI.Label(new Rect(10, 85, position.width - 20, 20), "Directory to Load Rooms From: ");
-                GUI.Label(new Rect(10, 85, position.width - 20, 20), "Room: ");
+                GUI.Label(new Rect(10, 95, position.width - 20, 20), "Room: ");
                 
                 // Get the currently selected item in the drop down
                 //selected = EditorGUI.Popup(new Rect(10, 110, position.width - 20, 20), selected, DirNames.ToArray());
@@ -122,12 +125,7 @@ namespace ASL.UI.Menus.Scanning
                     ms.Test();
                 }
 
-                if (GUI.Button(new Rect(10, 210, position.width - 20, 20), "Save BBox"))
-                {
-                    SaveBoundingBox();
-                }
-
-                if (GUI.Button(new Rect(10, 235, position.width - 20, 20), "Load BBox"))
+                if (GUI.Button(new Rect(10, 210, position.width - 20, 20), "Load BBox"))
                 {
                     ms.Load();
                 }
@@ -143,6 +141,16 @@ namespace ASL.UI.Menus.Scanning
         public List<GameObject> GetList()
         {
             return roomList;
+        }
+
+        public int GetSelectedRoom()
+        {
+            return selected;
+        }
+
+        public List<DirectoryInfo> GetDirectoryList()
+        {
+            return directoryInfoList;
         }
 
         /// <summary>
@@ -204,27 +212,31 @@ namespace ASL.UI.Menus.Scanning
             BinaryFormatter bf = new BinaryFormatter();
             FileStream file = File.Create(filepath);
 
-            //BoundingBoxSystem data = ms.areaBound;
             SerializableBounds data = new SerializableBounds(ms.meshBound.GetBound());
 
             bf.Serialize(file, data);
             file.Close();
+
+            UnityEditor.AssetDatabase.Refresh();
         }
 
-        public SerializableBounds LoadBoundingBox()
+        public SerializableBounds LoadBoundingBox(DirectoryInfo Dir)
         {
-            string roomFolder = Path.Combine(root.FullName, RoomName);
-            SetRoomFolder(roomFolder);
+            fileToLoad file = new fileToLoad();
+            foreach (FileInfo f in Dir.GetFiles())
+            {
+                int numNameComponents = f.Name.Split('.').Length;
+                file.filePath = f.DirectoryName;
+            }
 
             string filename = "BoundingBox.dat";
-            string filepath = Path.Combine(RoomFolder, filename);
+            string filepath = Path.Combine(file.filePath, filename);
 
             BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Open(filepath, FileMode.Open);
+            FileStream fs = File.Open(filepath, FileMode.Open);
 
-            //BoundingBoxSystem data = (BoundingBoxSystem)bf.Deserialize(file);
-            SerializableBounds data = (SerializableBounds)bf.Deserialize(file);
-            file.Close();
+            SerializableBounds data = (SerializableBounds)bf.Deserialize(fs);
+            fs.Close();
 
             return data;
         }

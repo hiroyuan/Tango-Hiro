@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
+using System.IO;
 
 public class MeshSplitterController : MonoBehaviour {
     public BoundingBoxSystem areaBound;
@@ -97,7 +98,9 @@ public class MeshSplitterController : MonoBehaviour {
 
     public void Load()
     {
-        SerializableBounds b = rs.LoadBoundingBox();
+        List<DirectoryInfo> directoryInfoList = rs.GetDirectoryList();
+        int selected = rs.GetSelectedRoom();
+        SerializableBounds b = rs.LoadBoundingBox(directoryInfoList[selected]);
         Vector3 center = convertSerializedVector3ToVector3(b.center);
         Vector3 size = convertSerializedVector3ToVector3(b.size);
         loadedBBox = new Bounds(center, size);
