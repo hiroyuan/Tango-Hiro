@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class BoundingBoxSystem {
@@ -14,12 +15,12 @@ public class BoundingBoxSystem {
 
     public BoundingBoxSystem()
     {
-        bounds = new Bounds();
-        //bounds = new SerializableBounds();
-        xDirCount = 1;
-        yDirCount = 1;
-        zDirCount = 1;
-        subBounds = new BoundHolder[xDirCount * yDirCount * zDirCount];
+        
+    }
+
+    public BoundingBoxSystem(BoundHolder[] b)
+    {
+        subBounds = b;
     }
 
     public BoundingBoxSystem(Bounds b, int x, int y, int z)
@@ -62,14 +63,6 @@ public class BoundingBoxSystem {
         subBounds = new BoundHolder[xDirCount * yDirCount * zDirCount];
     }
 
-    public void SerialozableBounds2Bounds(SerializableBounds serializableBounds)
-    {
-        Bounds b = new Bounds();
-        b.center = serializable2Original(serializableBounds.center);
-        b.size = serializable2Original(serializableBounds.size);
-        SetBound(b);
-    }
-
     public void SetBound(Bounds b)
     {
         bounds = b;
@@ -81,6 +74,16 @@ public class BoundingBoxSystem {
         xDirCount = x;
         yDirCount = y;
         zDirCount = z;
+        subBounds = new BoundHolder[xDirCount * yDirCount * zDirCount];
+    }
+
+    public void SetSplitter(List<GameObject> list, int x, int y, int z)
+    {
+        bounds = DrawBoundingBox(list);
+        xDirCount = x;
+        yDirCount = y;
+        zDirCount = z;
+        subBounds = new BoundHolder[xDirCount * yDirCount * zDirCount];
     }
 
     /// <summary>
@@ -165,10 +168,6 @@ public class BoundingBoxSystem {
     public void SplitMesh()
     {
         putTrianglesIntoBoundingBox(mesh);
-        //foreach (BoundHolder b in subBounds)
-        //{
-        //    b.ConstructMesh(mesh);
-        //}
         drawNewMesh();
     }
 
@@ -290,11 +289,11 @@ public class BoundingBoxSystem {
 
     private void putTrianglesIntoBoundingBox(Mesh m)
     {
-        for (int index = 0; index < m.triangles.Length; index += 3)
+        for (int index = 0; index < m.triangles.Length/*999*/; index += 3)
         {
             int vertexIndex = m.triangles[0 + index];
             Vector3 worldPoint = trans.TransformPoint(m.vertices[vertexIndex]);
-            BoundHolder b = FindBoundingBox(worldPoint);
+            BoundHolder b = FindBoundingBox(/*m.vertices[vertexIndex]*/worldPoint);
             int[] triangle = new int[3];
             triangle[0] = m.triangles[0 + index];
             triangle[1] = m.triangles[1 + index];
@@ -312,26 +311,10 @@ public class BoundingBoxSystem {
             MeshFilter mf = newGameObject.AddComponent<MeshFilter>();
             mf.name = "NewMesh" + index;
             MeshRenderer mr = newGameObject.AddComponent<MeshRenderer>();
-            Mesh m = new Mesh();
 
-            m.vertices = b.GetVertices().ToArray();
-            m.normals = b.GetNormals().ToArray();
-            m.colors = b.GetColors().ToArray();
-            m.uv = b.GetUVs().ToArray();
-            m.triangles = b.GetTriangles().ToArray();
-
-            mf.mesh = m;
+            mf.mesh = b.SetThenGetMesh();
             mr.material = new Material(Shader.Find("Custom/UnlitVertexColor"));
             index++;
         }
-    }
-
-    private Vector3 serializable2Original(SerializableVector3 sVector)
-    {
-        Vector3 v = new Vector3();
-        v.x = sVector.x;
-        v.y = sVector.y;
-        v.z = sVector.z;
-        return v;
     }
 }

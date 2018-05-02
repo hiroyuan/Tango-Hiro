@@ -206,39 +206,50 @@ namespace ASL.UI.Menus.Scanning
             string roomFolder = Path.Combine(root.FullName, RoomName);
             SetRoomFolder(roomFolder);
 
-            string filename = "BoundingBox.dat";
-            string filepath = Path.Combine(RoomFolder, filename);
+            int i = 0;
+            foreach (BoundHolder b in ms.meshBound.GetSubBounds())
+            {
+                string filename = "Mesh_With_BoundingBox_" + i + ".dat";
+                string filepath = Path.Combine(RoomFolder, filename);
 
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream file = File.Create(filepath);
-
-            SerializableBounds data = new SerializableBounds(ms.meshBound.GetBound());
-
-            bf.Serialize(file, data);
-            file.Close();
-
+                byte[] data = ms.meshBound.GetSubBounds()[i].Serialize();
+                File.WriteAllBytes(filepath, data);
+                i++;
+            }
             UnityEditor.AssetDatabase.Refresh();
         }
 
-        public SerializableBounds LoadBoundingBox(DirectoryInfo Dir)
+        public BoundHolder[] LoadBoundingBox(DirectoryInfo Dir)
         {
-            fileToLoad file = new fileToLoad();
+            string directoryPath = Dir.FullName;
+
+            int countOfFiles = 0;
+            string extension = ".dat";
             foreach (FileInfo f in Dir.GetFiles())
             {
-                int numNameComponents = f.Name.Split('.').Length;
-                file.filePath = f.DirectoryName;
+                //UnityEngine.Debug.Log(f.FullName);
+                if (extension.Equals(Path.GetExtension(f.FullName)))
+                {
+                    countOfFiles++;
+                }
             }
 
-            string filename = "BoundingBox.dat";
-            string filepath = Path.Combine(file.filePath, filename);
+            BoundHolder[] results = new BoundHolder[countOfFiles];
 
-            BinaryFormatter bf = new BinaryFormatter();
-            FileStream fs = File.Open(filepath, FileMode.Open);
+            //UnityEngine.Debug.Log(countOfFiles);
+            for (int i = 0; i < countOfFiles; i++)
+            {
+                string filename = "Mesh_With_BoundingBox_" + i + extension;
+                string filepath = Path.Combine(directoryPath, filename);
 
-            SerializableBounds data = (SerializableBounds)bf.Deserialize(fs);
-            fs.Close();
-
-            return data;
+                //byte[] readByteArray = File.ReadAllBytes(filepath).Take(24).ToArray();
+                byte[] readByteArray = File.ReadAllBytes(filepath);
+                results[i] = new BoundHolder();
+                //results[i] = results[i].DesirializeBounds(readByteArray);
+                results[i] = results[i].Desirialize(readByteArray);
+            }
+            
+            return results;
         }
 
         /// <summary>

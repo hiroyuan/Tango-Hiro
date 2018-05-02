@@ -31,34 +31,40 @@ public class MeshSplitterController : MonoBehaviour {
         rs = (RoomSave)EditorWindow.GetWindow(typeof(RoomSave));
         specificMeshes = new List<GameObject>();
         indicator = GameObject.Find("IndicatorObject");
+
+        areaBound = new BoundingBoxSystem(rs.GetList(), x_area, y_area, z_area);
+        areaBound.SplitBounds();
     }
 	
 	// Update is called once per frame
 	void Update ()
     {
-        if (rs.GetList() != null)
-        {
-            areaBound = new BoundingBoxSystem(rs.GetList(), x_area, y_area, z_area);
-            areaBound.SplitBounds();
-        }
+        //if (rs.GetList() != null)
+        //{
+        //    areaBound = new BoundingBoxSystem(rs.GetList(), x_area, y_area, z_area);
+        //    areaBound.SplitBounds();
+        //}
 
-        if (loadedBound != null)
-        {
-            loadedBound = new BoundingBoxSystem(loadedBBox, x_area, y_area, z_area);
-            loadedBound.SplitBounds();
-        }
+        areaBound.SetSplitter(rs.GetList(), x_area, y_area, z_area);
+        areaBound.SplitBounds();
+
+        //if (loadedBound != null)
+        //{
+        //    loadedBound = new BoundingBoxSystem(loadedBBox, x_area, y_area, z_area);
+        //    loadedBound.SplitBounds();
+        //}
 
     }
 
     void OnDrawGizmos()
     {
-        //if (areaBound != null)
-        //{
-        //    for (int i = 0; i < areaBound.GetSubBounds().Length; i++)
-        //    {
-        //        Gizmos.DrawWireCube(areaBound.GetSubBounds()[i].subBound.center, areaBound.GetSubBounds()[i].subBound.size);
-        //    }
-        //}
+        if (areaBound != null)
+        {
+            for (int i = 0; i < areaBound.GetSubBounds().Length; i++)
+            {
+                Gizmos.DrawWireCube(areaBound.GetSubBounds()[i].subBound.center, areaBound.GetSubBounds()[i].subBound.size);
+            }
+        }
 
         if (meshBound != null)
         {
@@ -70,7 +76,9 @@ public class MeshSplitterController : MonoBehaviour {
 
         if (loadedBound != null)
         {
-            Gizmos.DrawWireCube(loadedBound.GetBound().center, loadedBound.GetBound().size);
+            //Debug.Log("Loaded bound is not null");
+            //Debug.Log("length of subBounds: " + loadedBound.GetSubBounds().Length);
+            //Gizmos.DrawWireCube(loadedBound.GetBound().center, loadedBound.GetBound().size);
             for (int i = 0; i < loadedBound.GetSubBounds().Length; i++)
             {
                 Gizmos.DrawWireCube(loadedBound.GetSubBounds()[i].subBound.center, loadedBound.GetSubBounds()[i].subBound.size);
@@ -100,27 +108,8 @@ public class MeshSplitterController : MonoBehaviour {
     {
         List<DirectoryInfo> directoryInfoList = rs.GetDirectoryList();
         int selected = rs.GetSelectedRoom();
-        SerializableBounds b = rs.LoadBoundingBox(directoryInfoList[selected]);
-        Vector3 center = convertSerializedVector3ToVector3(b.center);
-        Vector3 size = convertSerializedVector3ToVector3(b.size);
-        loadedBBox = new Bounds(center, size);
-        loadedBound = new BoundingBoxSystem(loadedBBox, x_area, y_area, z_area);
-    }
-
-    private Bounds convertSerializedBoundsToBounds(SerializableBounds bounds)
-    {
-        Bounds b = new Bounds();
-        b.center = convertSerializedVector3ToVector3(bounds.center);
-        b.size = convertSerializedVector3ToVector3(bounds.size);
-        return b;
-    }
-
-    private Vector3 convertSerializedVector3ToVector3(SerializableVector3 v)
-    {
-        Vector3 vector3 = new Vector3();
-        vector3.x = v.x;
-        vector3.y = v.y;
-        vector3.z = v.z;
-        return vector3;
+        BoundHolder[] bhs = rs.LoadBoundingBox(directoryInfoList[selected]);
+        //Debug.Log("length of bhs: " + bhs.Length);
+        loadedBound = new BoundingBoxSystem(bhs);
     }
 }
