@@ -66,7 +66,6 @@ public class BoundingBoxSystem {
     public void SetBound(Bounds b)
     {
         bounds = b;
-        //bounds.SetBounds(b);
     }
 
     public void SetSplitter(int x, int y, int z)
@@ -153,7 +152,7 @@ public class BoundingBoxSystem {
                 for (int k = 0; k < xDirCount; k++)
                 {
                     subCenter = new Vector3(xStartPoint + sizeX / 2, yStartPoint + sizeY / 2, zStartPoint + sizeZ / 2);
-                    subBounds[index++] = new BoundHolder(subCenter, subSize);
+                    subBounds[index++] = new BoundHolder(subCenter, subSize, mesh, xDirCount * yDirCount * zDirCount);
                     xStartPoint += sizeX;
                 }
                 xStartPoint = bounds.min.x;
@@ -289,12 +288,14 @@ public class BoundingBoxSystem {
 
     private void putTrianglesIntoBoundingBox(Mesh m)
     {
-        for (int index = 0; index < m.triangles.Length/*999*/; index += 3)
+        int vertexIndex = 0;
+        BoundHolder b = null;
+        int[] triangle = new int[3];
+        for (int index = 0; index < m.triangles.Length/*256965*/; index += 3)
         {
-            int vertexIndex = m.triangles[0 + index];
+            vertexIndex = m.triangles[0 + index];
             Vector3 worldPoint = trans.TransformPoint(m.vertices[vertexIndex]);
-            BoundHolder b = FindBoundingBox(/*m.vertices[vertexIndex]*/worldPoint);
-            int[] triangle = new int[3];
+            b = FindBoundingBox(/*m.vertices[vertexIndex]*/worldPoint);
             triangle[0] = m.triangles[0 + index];
             triangle[1] = m.triangles[1 + index];
             triangle[2] = m.triangles[2 + index];

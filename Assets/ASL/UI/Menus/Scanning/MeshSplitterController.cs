@@ -32,8 +32,8 @@ public class MeshSplitterController : MonoBehaviour {
         specificMeshes = new List<GameObject>();
         indicator = GameObject.Find("IndicatorObject");
 
-        areaBound = new BoundingBoxSystem(rs.GetList(), x_area, y_area, z_area);
-        areaBound.SplitBounds();
+        //areaBound = new BoundingBoxSystem(rs.GetList(), x_area, y_area, z_area);
+        //areaBound.SplitBounds();
     }
 	
 	// Update is called once per frame
@@ -45,8 +45,8 @@ public class MeshSplitterController : MonoBehaviour {
         //    areaBound.SplitBounds();
         //}
 
-        areaBound.SetSplitter(rs.GetList(), x_area, y_area, z_area);
-        areaBound.SplitBounds();
+        //areaBound.SetSplitter(rs.GetList(), x_area, y_area, z_area);
+        //areaBound.SplitBounds();
 
         //if (loadedBound != null)
         //{
@@ -101,6 +101,11 @@ public class MeshSplitterController : MonoBehaviour {
         specificMeshes.Add(roomMesh);
         meshBound = new BoundingBoxSystem(specificMeshes, x_mesh, y_mesh, z_mesh, roomMesh.transform, roomMesh.GetComponent<MeshFilter>().mesh);
         meshBound.SplitBounds();
+        //meshBound.SplitMesh();
+    }
+
+    public void SplitMeshByBounds()
+    {
         meshBound.SplitMesh();
     }
 

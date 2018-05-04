@@ -120,12 +120,15 @@ namespace ASL.UI.Menus.Scanning
                 if (GUI.Button(new Rect(10, 160, position.width - 20, 20), "Unload Selected Room"))
                     UnloadRoom(directoryInfoList[selected]);
 
-                if (GUI.Button(new Rect(10, 185, position.width - 20, 20), "Select Mesh and Split"))
+                if (GUI.Button(new Rect(10, 185, position.width - 20, 20), "Select Mesh and Set Bounds"))
                 {
                     ms.Test();
                 }
-
-                if (GUI.Button(new Rect(10, 210, position.width - 20, 20), "Load BBox"))
+                if (GUI.Button(new Rect(10, 210, position.width - 20, 20), "Split Meshes By Bounds"))
+                {
+                    ms.SplitMeshByBounds();
+                }
+                if (GUI.Button(new Rect(10, 235, position.width - 20, 20), "Load BBox"))
                 {
                     ms.Load();
                 }

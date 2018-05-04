@@ -2,14 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using System;
 
 public class BoundHolder {
     public Bounds subBound;
     private List<Vector3> partialVertices;
     private List<Vector3> partialNormals;
-    private List<Color> partialColoar;
+    private List<Color> partialColor;
     private List<Vector2> partialUVs;
     private List<int> newTriangles;
+
+    //private Vector3[] partialVertices;
+    //private Vector3[] partialNormals;
+    //private Color[] partialColor;
+    //private int[] newTriangles;
+
     private VertexLookUp map;
     private bool isActive;
     public Mesh mesh;
@@ -19,15 +26,24 @@ public class BoundHolder {
         isActive = false;
     }
 
-    public BoundHolder(Vector3 center, Vector3 size)
+    public BoundHolder(Vector3 center, Vector3 size, Mesh m, int amtOfSubBounds)
     {
         subBound = new Bounds(center, size);
-        partialVertices = new List<Vector3>();
-        partialNormals = new List<Vector3>();
-        partialColoar = new List<Color>();
-        partialUVs = new List<Vector2>();
-        newTriangles = new List<int>();
-        map = new VertexLookUp();
+        partialVertices = new List<Vector3>(2 * (m.vertices.Length / amtOfSubBounds));
+        partialNormals = new List<Vector3>(2 * (m.normals.Length / amtOfSubBounds));
+        partialColor = new List<Color>(2 * (m.colors.Length / amtOfSubBounds));
+        //partialUVs = new List<Vector2>(2 * (m.uv.Length / amtOfSubBounds));
+        newTriangles = new List<int>(2 * (m.triangles.Length / amtOfSubBounds));
+        //partialVertices = new List<Vector3>();
+        //partialNormals = new List<Vector3>();
+        //partialColor = new List<Color>();
+        //newTriangles = new List<int>();
+        //partialVertices = new Vector3[2 * (m.vertices.Length / amtOfSubBounds)];
+        //partialNormals = new Vector3[2 * (m.normals.Length / amtOfSubBounds)];
+        //partialColor = new Color[2 * (m.colors.Length / amtOfSubBounds)];
+        //newTriangles = new int[2 * (m.triangles.Length / amtOfSubBounds)];
+
+        map = new VertexLookUp(m, amtOfSubBounds);
         isActive = false;
         mesh = new Mesh();
     }
@@ -63,7 +79,7 @@ public class BoundHolder {
                 partialVertices.Add(m.vertices[vertexIndex]);
                 partialNormals.Add(m.normals[vertexIndex]);
                 if (m.colors.Length != 0)
-                    partialColoar.Add(m.colors[vertexIndex]);
+                    partialColor.Add(m.colors[vertexIndex]);
                 if (m.uv.Length != 0)
                     partialUVs.Add(m.uv[vertexIndex]);
             }
@@ -72,37 +88,37 @@ public class BoundHolder {
         }
     }
 
-    public List<Vector3> GetVertices()
-    {
-        return partialVertices;
-    }
+    //public Vector3[] GetVertices()
+    //{
+    //    return partialVertices;
+    //}
 
-    public List<int> GetTriangles()
-    {
-        return newTriangles;
-    }
+    //public int[] GetTriangles()
+    //{
+    //    return newTriangles;
+    //}
 
-    public List<Vector3> GetNormals()
-    {
-        return partialNormals;
-    }
+    //public Vector3[] GetNormals()
+    //{
+    //    return partialNormals;
+    //}
 
-    public List<Color> GetColors()
-    {
-        return partialColoar;
-    }
+    //public Color[] GetColors()
+    //{
+    //    return partialColor;
+    //}
 
-    public List<Vector2> GetUVs()
-    {
-        return partialUVs;
-    }
+    //public List<Vector2> GetUVs()
+    //{
+    //    return partialUVs;
+    //}
 
     public Mesh SetThenGetMesh()
     {
         mesh.vertices = partialVertices.ToArray();
         mesh.normals = partialNormals.ToArray();
-        mesh.colors = partialColoar.ToArray();
-        mesh.uv = partialUVs.ToArray();
+        mesh.colors = partialColor.ToArray();
+        //mesh.uv = partialUVs.ToArray();
         mesh.triangles = newTriangles.ToArray();
 
         return mesh;
