@@ -12,11 +12,6 @@ public class BoundHolder {
     private List<Vector2> partialUVs;
     private List<int> newTriangles;
 
-    //private Vector3[] partialVertices;
-    //private Vector3[] partialNormals;
-    //private Color[] partialColor;
-    //private int[] newTriangles;
-
     private VertexLookUp map;
     private bool isActive;
     public Mesh mesh;
@@ -34,14 +29,6 @@ public class BoundHolder {
         partialColor = new List<Color>(2 * (m.colors.Length / amtOfSubBounds));
         //partialUVs = new List<Vector2>(2 * (m.uv.Length / amtOfSubBounds));
         newTriangles = new List<int>(2 * (m.triangles.Length / amtOfSubBounds));
-        //partialVertices = new List<Vector3>();
-        //partialNormals = new List<Vector3>();
-        //partialColor = new List<Color>();
-        //newTriangles = new List<int>();
-        //partialVertices = new Vector3[2 * (m.vertices.Length / amtOfSubBounds)];
-        //partialNormals = new Vector3[2 * (m.normals.Length / amtOfSubBounds)];
-        //partialColor = new Color[2 * (m.colors.Length / amtOfSubBounds)];
-        //newTriangles = new int[2 * (m.triangles.Length / amtOfSubBounds)];
 
         map = new VertexLookUp(m, amtOfSubBounds);
         isActive = false;
@@ -67,7 +54,7 @@ public class BoundHolder {
         return false;
     }
 
-    public void AddTriangle(int[] triangle, Mesh m)
+    public void AddTriangle(int[] triangle, Vector3[] vs, Vector3[] ns, Color[] cs, int[] ts)
     {
         for (int index = 0; index < triangle.Length; index++)
         {
@@ -76,42 +63,15 @@ public class BoundHolder {
             {
                 // vertexIndex is new to this BoundHolder
                 map.AddOldIndex(vertexIndex);
-                partialVertices.Add(m.vertices[vertexIndex]);
-                partialNormals.Add(m.normals[vertexIndex]);
-                if (m.colors.Length != 0)
-                    partialColor.Add(m.colors[vertexIndex]);
-                if (m.uv.Length != 0)
-                    partialUVs.Add(m.uv[vertexIndex]);
+                partialVertices.Add(vs[vertexIndex]);
+                partialNormals.Add(ns[vertexIndex]);
+                if (cs.Length != 0)
+                    partialColor.Add(cs[vertexIndex]);
             }
             int newIndex = map.FindValue(triangle[index]);
             newTriangles.Add(newIndex);
         }
     }
-
-    //public Vector3[] GetVertices()
-    //{
-    //    return partialVertices;
-    //}
-
-    //public int[] GetTriangles()
-    //{
-    //    return newTriangles;
-    //}
-
-    //public Vector3[] GetNormals()
-    //{
-    //    return partialNormals;
-    //}
-
-    //public Color[] GetColors()
-    //{
-    //    return partialColor;
-    //}
-
-    //public List<Vector2> GetUVs()
-    //{
-    //    return partialUVs;
-    //}
 
     public Mesh SetThenGetMesh()
     {

@@ -291,16 +291,38 @@ public class BoundingBoxSystem {
         int vertexIndex = 0;
         BoundHolder b = null;
         int[] triangle = new int[3];
-        for (int index = 0; index < m.triangles.Length/*256965*/; index += 3)
+
+        //List<Vector3> verticesCopy = new List<Vector3>(m.vertices);
+        //List<Vector3> normalsCopy = new List<Vector3>(m.normals);
+        //List<Color> colorsCopy = new List<Color>(m.colors);
+        //List<int> trianglesCopy = new List<int>(m.triangles);
+
+        Vector3[] verticesCopy = m.vertices;
+        Vector3[] normalsCopy = m.normals;
+        Color[] colorsCopy = m.colors;
+        int[] trianglesCopy = m.triangles;
+
+        for (int index = 0; index < trianglesCopy.Length; index += 3)
         {
-            vertexIndex = m.triangles[0 + index];
-            Vector3 worldPoint = trans.TransformPoint(m.vertices[vertexIndex]);
-            b = FindBoundingBox(/*m.vertices[vertexIndex]*/worldPoint);
-            triangle[0] = m.triangles[0 + index];
-            triangle[1] = m.triangles[1 + index];
-            triangle[2] = m.triangles[2 + index];
-            b.AddTriangle(triangle, m);
+            vertexIndex = trianglesCopy[0 + index];
+            Vector3 worldPoint = trans.TransformPoint(verticesCopy[vertexIndex]);
+            b = FindBoundingBox(worldPoint);
+            triangle[0] = trianglesCopy[0 + index];
+            triangle[1] = trianglesCopy[1 + index];
+            triangle[2] = trianglesCopy[2 + index];
+            b.AddTriangle(triangle, verticesCopy, normalsCopy, colorsCopy, trianglesCopy);
         }
+
+        //for (int index = 0; index < m.triangles.Length/*256965*/; index += 3)
+        //{
+        //    vertexIndex = m.triangles[0 + index];
+        //    Vector3 worldPoint = trans.TransformPoint(m.vertices[vertexIndex]);
+        //    b = FindBoundingBox(/*m.vertices[vertexIndex]*/worldPoint);
+        //    triangle[0] = m.triangles[0 + index];
+        //    triangle[1] = m.triangles[1 + index];
+        //    triangle[2] = m.triangles[2 + index];
+        //    b.AddTriangle(triangle, m);
+        //}
     }
 
     private void drawNewMesh()

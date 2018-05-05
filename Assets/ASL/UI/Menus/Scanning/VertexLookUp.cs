@@ -8,8 +8,8 @@ public class VertexLookUp {
 
 	public VertexLookUp(Mesh m, int amtOfSubBounds)
     {
-        //dictionary = new Dictionary<int, int>(2 * (m.vertices.Length / amtOfSubBounds));
-        dictionary = new Dictionary<int, int>();
+        dictionary = new Dictionary<int, int>(2 * (m.vertices.Length / amtOfSubBounds));
+        //dictionary = new Dictionary<int, int>();
         newIndex = 0;
     }
 
