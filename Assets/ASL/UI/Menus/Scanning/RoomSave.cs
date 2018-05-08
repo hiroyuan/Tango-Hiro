@@ -98,7 +98,7 @@ namespace ASL.UI.Menus.Scanning
             if (GUI.Button(new Rect(10, 50, position.width - 20, 20), "Save Rooms"))
                 SaveRooms(roomList, directoryInfoList);
 
-            if (GUI.Button(new Rect(10, 75, position.width - 20, 20), "Save BBox"))
+            if (GUI.Button(new Rect(10, 75, position.width - 20, 20), "Save split mesh with BBox"))
                 SaveBoundingBox();
 
             // If there are directories within the root directory
@@ -120,15 +120,11 @@ namespace ASL.UI.Menus.Scanning
                 if (GUI.Button(new Rect(10, 160, position.width - 20, 20), "Unload Selected Room"))
                     UnloadRoom(directoryInfoList[selected]);
 
-                if (GUI.Button(new Rect(10, 185, position.width - 20, 20), "Select Mesh and Set Bounds"))
+                if (GUI.Button(new Rect(10, 185, position.width - 20, 20), "Select Mesh and split"))
                 {
                     ms.Test();
                 }
-                if (GUI.Button(new Rect(10, 210, position.width - 20, 20), "Split Meshes By Bounds"))
-                {
-                    ms.SplitMeshByBounds();
-                }
-                if (GUI.Button(new Rect(10, 235, position.width - 20, 20), "Load BBox"))
+                if (GUI.Button(new Rect(10, 210, position.width - 20, 20), "Load BBox"))
                 {
                     ms.Load();
                 }
@@ -209,15 +205,30 @@ namespace ASL.UI.Menus.Scanning
             string roomFolder = Path.Combine(root.FullName, RoomName);
             SetRoomFolder(roomFolder);
 
-            int i = 0;
-            foreach (BoundHolder b in ms.meshBound.GetSubBounds())
+            int areaBoundIndex = 0;
+            foreach (BoundHolder b in ms.areaBound.GetSubBounds())
             {
-                string filename = "Mesh_With_BoundingBox_" + i + ".dat";
+                string filename = "areaBound.dat";
                 string filepath = Path.Combine(RoomFolder, filename);
 
-                byte[] data = ms.meshBound.GetSubBounds()[i].Serialize();
+                byte[] data = ms.areaBound.GetSubBounds()[areaBoundIndex].SerializeBounds();
                 File.WriteAllBytes(filepath, data);
-                i++;
+            }
+
+            int fileCount = 0;
+            for (int boundsIndex = 0; boundsIndex < ms.meshBounds.Count; boundsIndex++)
+            {
+                int i = 0;
+                foreach (BoundHolder b in ms.meshBounds[boundsIndex].GetSubBounds())
+                {
+                    string filename = "Mesh_With_BoundingBox_" + fileCount + ".dat";
+                    string filepath = Path.Combine(RoomFolder, filename);
+
+                    byte[] data = ms.meshBounds[boundsIndex].GetSubBounds()[i].Serialize();
+                    File.WriteAllBytes(filepath, data);
+                    i++;
+                    fileCount++;
+                }
             }
             UnityEditor.AssetDatabase.Refresh();
         }
@@ -238,21 +249,49 @@ namespace ASL.UI.Menus.Scanning
             }
 
             BoundHolder[] results = new BoundHolder[countOfFiles];
+            string areafilename = "areaBound.dat";
+            string areafilepath = Path.Combine(directoryPath, areafilename);
+            byte[] areaByteArray = File.ReadAllBytes(areafilepath);
+            results[0] = new BoundHolder();
+            results[0] = results[0].DesirializeBounds(areaByteArray);
 
             //UnityEngine.Debug.Log(countOfFiles);
-            for (int i = 0; i < countOfFiles; i++)
+            for (int i = 1; i < countOfFiles; i++)
             {
-                string filename = "Mesh_With_BoundingBox_" + i + extension;
+                string filename = "Mesh_With_BoundingBox_" + (i - 1) + extension;
                 string filepath = Path.Combine(directoryPath, filename);
 
-                //byte[] readByteArray = File.ReadAllBytes(filepath).Take(24).ToArray();
                 byte[] readByteArray = File.ReadAllBytes(filepath);
                 results[i] = new BoundHolder();
-                //results[i] = results[i].DesirializeBounds(readByteArray);
-                results[i] = results[i].Desirialize(readByteArray);
+                results[i] = results[i].DesirializeBounds(readByteArray);
+                results[i].id = i - 1;
             }
             
             return results;
+        }
+
+        public BoundHolder LoadMeshes(DirectoryInfo dir, int id)
+        {
+            string directoryPath = dir.FullName;
+
+            int countOfFiles = 0;
+            string extension = ".dat";
+            foreach (FileInfo f in dir.GetFiles())
+            {
+                //UnityEngine.Debug.Log(f.FullName);
+                if (extension.Equals(Path.GetExtension(f.FullName)))
+                {
+                    countOfFiles++;
+                }
+            }
+
+            BoundHolder result = new BoundHolder();
+            string filename = "Mesh_With_BoundingBox_" + id + extension;
+            string filepath = Path.Combine(directoryPath, filename);
+            byte[] readByteArray = File.ReadAllBytes(filepath).Skip(24).ToArray();
+            result = result.DesirializeMeshes(readByteArray);
+
+            return result;
         }
 
         /// <summary>

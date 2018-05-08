@@ -745,6 +745,7 @@
     <Compile Include="Assets\ASL\UI\Menus\Scanning\BoundHolder.cs" />
     <Compile Include="Assets\ASL\UI\Menus\Scanning\BoundingBoxSystem.cs" />
     <Compile Include="Assets\ASL\UI\Menus\Scanning\Controller.cs" />
+    <Compile Include="Assets\ASL\UI\Menus\Scanning\LoadedMeshHolder.cs" />
     <Compile Include="Assets\ASL\UI\Menus\Scanning\MeshHolder.cs" />
     <Compile Include="Assets\ASL\UI\Menus\Scanning\MeshSplitterController.cs" />
     <Compile Include="Assets\ASL\UI\Menus\Scanning\RoomSave.cs" />

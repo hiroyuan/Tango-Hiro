@@ -15,11 +15,26 @@ public class BoundHolder {
     private VertexLookUp map;
     private bool isActive;
     public Mesh mesh;
+    public int id;
 
     public BoundHolder()
     {
         isActive = false;
     }
+
+    public BoundHolder(Vector3 center, Vector3 size)
+    {
+        subBound = new Bounds(center, size);
+    }
+
+    //public BoundHolder(Vector3 center, Vector3 size, List<GameObject> roomList)
+    //{
+    //    subBound = new Bounds(center, size);
+    //    foreach (GameObject go in roomList)
+    //    {
+
+    //    }
+    //}
 
     public BoundHolder(Vector3 center, Vector3 size, Mesh m, int amtOfSubBounds)
     {
@@ -98,6 +113,19 @@ public class BoundHolder {
         }
     }
 
+    public byte[] SerializeBounds()
+    {
+        using (MemoryStream ms = new MemoryStream())
+        {
+            using (BinaryWriter bw = new BinaryWriter(ms))
+            {
+                writeBounds(bw, subBound);
+            }
+
+            return ms.ToArray();
+        }
+    }
+
     public BoundHolder Desirialize(byte[] data)
     {
         BoundHolder result = new BoundHolder();
@@ -120,6 +148,21 @@ public class BoundHolder {
             using (BinaryReader br = new BinaryReader(ms))
             {
                 result.subBound = readBounds(br);
+            }
+            return result;
+        }
+    }
+
+    public BoundHolder DesirializeMeshes(byte[] data)
+    {
+        //byte[] meshesData = new byte[data.Length - 24];
+        //Array.Copy(data, 24, meshesData, 0, meshesData.Length);
+        BoundHolder result = new BoundHolder();
+        using (MemoryStream ms = new MemoryStream(data))
+        {
+            using (BinaryReader br = new BinaryReader(ms))
+            {
+                result.mesh = readMesh(br);
             }
             return result;
         }
@@ -150,32 +193,38 @@ public class BoundHolder {
 
     private void writeMesh(BinaryWriter bw, Mesh m)
     {
+        // make copy of mesh arrays
+        Vector3[] copyVertices = m.vertices;
+        Vector3[] copyNormals = m.normals;
+        Color[] copyColors = m.colors;
+        int[] copyTriangles = m.triangles;
+
         // write the length of arrays first so that I can generate proper array length when I read back
-        bw.Write(m.vertices.Length);
-        bw.Write(m.normals.Length);
-        bw.Write(m.colors.Length);
-        bw.Write(m.triangles.Length);
+        bw.Write(copyVertices.Length);
+        bw.Write(copyNormals.Length);
+        bw.Write(copyColors.Length);
+        bw.Write(copyTriangles.Length);
 
         int index = 0;
-        foreach (Vector3 vertex in m.vertices)
+        foreach (Vector3 vertex in copyVertices)
         { 
-            bw.Write(m.vertices[index].x);
-            bw.Write(m.vertices[index].y);
-            bw.Write(m.vertices[index].z);
-            bw.Write(m.normals[index].x);
-            bw.Write(m.normals[index].y);
-            bw.Write(m.normals[index].z);
-            bw.Write(m.colors[index].r);
-            bw.Write(m.colors[index].g);
-            bw.Write(m.colors[index].b);
-            bw.Write(m.colors[index].a);
+            bw.Write(copyVertices[index].x);
+            bw.Write(copyVertices[index].y);
+            bw.Write(copyVertices[index].z);
+            bw.Write(copyNormals[index].x);
+            bw.Write(copyNormals[index].y);
+            bw.Write(copyNormals[index].z);
+            bw.Write(copyColors[index].r);
+            bw.Write(copyColors[index].g);
+            bw.Write(copyColors[index].b);
+            bw.Write(copyColors[index].a);
             index++;
         }
 
         index = 0;
-        foreach (int triangleIndex in m.triangles)
+        foreach (int triangleIndex in copyTriangles)
         {
-            bw.Write(m.triangles[index]);
+            bw.Write(copyTriangles[index]);
             index++;
         }
     }

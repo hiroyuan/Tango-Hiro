@@ -133,7 +133,7 @@ public class BoundingBoxSystem {
         return new Bounds(center, new Vector3(sizeX, sizeY, sizeZ));
     }
 
-    public void SplitBounds()
+    public void SplitBounds(bool isNormalBounds)
     {
         float sizeX = (bounds.max.x - bounds.min.x) / xDirCount;
         float sizeY = (bounds.max.y - bounds.min.y) / yDirCount;
@@ -152,7 +152,10 @@ public class BoundingBoxSystem {
                 for (int k = 0; k < xDirCount; k++)
                 {
                     subCenter = new Vector3(xStartPoint + sizeX / 2, yStartPoint + sizeY / 2, zStartPoint + sizeZ / 2);
-                    subBounds[index++] = new BoundHolder(subCenter, subSize, mesh, xDirCount * yDirCount * zDirCount);
+                    if (isNormalBounds)
+                        subBounds[index++] = new BoundHolder(subCenter, subSize, mesh, xDirCount * yDirCount * zDirCount);
+                    else
+                        subBounds[index++] = new BoundHolder(subCenter, subSize);
                     xStartPoint += sizeX;
                 }
                 xStartPoint = bounds.min.x;
@@ -188,7 +191,6 @@ public class BoundingBoxSystem {
     public Bounds GetBound()
     {
         return bounds;
-        //return bounds.GetBounds();
     }
 
     public BoundHolder[] GetSubBounds()
@@ -282,6 +284,10 @@ public class BoundingBoxSystem {
 
         int indexOfSubBounds = nthSubBoundsForXDir + nthSubBoundsForYDir * xDirCount + nthSubBoundsForZDir * xDirCount * yDirCount;
         //Debug.Log("Index of SubBound: " + indexOfSubBounds);
+        if (indexOfSubBounds >= subBounds.Length)
+            indexOfSubBounds = subBounds.Length - 1;
+        else if (indexOfSubBounds < 0)
+            indexOfSubBounds = 0;
 
         return subBounds[indexOfSubBounds];
     }
@@ -291,11 +297,6 @@ public class BoundingBoxSystem {
         int vertexIndex = 0;
         BoundHolder b = null;
         int[] triangle = new int[3];
-
-        //List<Vector3> verticesCopy = new List<Vector3>(m.vertices);
-        //List<Vector3> normalsCopy = new List<Vector3>(m.normals);
-        //List<Color> colorsCopy = new List<Color>(m.colors);
-        //List<int> trianglesCopy = new List<int>(m.triangles);
 
         Vector3[] verticesCopy = m.vertices;
         Vector3[] normalsCopy = m.normals;
