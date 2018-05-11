@@ -1,20 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 using System.Linq;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
+using System.Runtime.Serialization.Formatters.Binary; // ERROR TESTING - See if we can comment this out
 
 using UWBNetworkingPackage;
 
-namespace ASL.UI.Menus.Scanning
+namespace ASL.Scanning.Tango
 {
-#if UNITY_EDITOR
-    public class RoomSave : EditorWindow
+    public class RoomSaveLogic : MonoBehaviour
     {
         #region Fields
         /// <summary>
@@ -26,14 +22,14 @@ namespace ASL.UI.Menus.Scanning
         /// Default room name used
         /// </summary>
         public const string DefaultRoomName = "TangoDefault";
-        
+
         /// <summary>
         /// Reference to the folder in which the Room objects are kept
         /// </summary>
         public string RoomFolder = "";
 
         public string TangoTag = "Tango";
-        
+
         /// <summary>
         /// List of all Room objects
         /// </summary>
@@ -78,64 +74,9 @@ namespace ASL.UI.Menus.Scanning
 
         public static GameObject obj;
         public MeshSplitterController ms;
-
         #endregion
 
         #region Methods
-        /// <summary>
-        /// Creates the UI for the Room Manager Window
-        /// </summary>
-        void OnGUI()
-        {
-            // Create a label for save section
-            GUI.Label(new Rect(10, 5, position.width - 20, 20), "Directory to Save Rooms to: ");
-            // Create a text entry for Directory creation/saving
-            RoomName = EditorGUI.TextField(new Rect(10, 25, position.width - 20, 20),
-                    "Room Name: ",
-                    RoomName);
-            
-            // Create a save Rooms button and link it to the function
-            if (GUI.Button(new Rect(10, 50, position.width - 20, 20), "Save Rooms"))
-                SaveRooms(roomList, directoryInfoList);
-
-            if (GUI.Button(new Rect(10, 75, position.width - 20, 20), "Save split mesh with BBox"))
-                SaveBoundingBox();
-
-            // If there are directories within the root directory
-            if (directoryInfoList.Count > 0)
-            {
-                // Create the load lable
-                // GUI.Label(new Rect(10, 85, position.width - 20, 20), "Directory to Load Rooms From: ");
-                GUI.Label(new Rect(10, 95, position.width - 20, 20), "Room: ");
-                
-                // Get the currently selected item in the drop down
-                //selected = EditorGUI.Popup(new Rect(10, 110, position.width - 20, 20), selected, DirNames.ToArray());
-                selected = EditorGUI.Popup(new Rect(10, 110, position.width - 20, 20), selected, roomNameList.ToArray());
-
-                // Create load button
-                if (GUI.Button(new Rect(10, 135, position.width - 20, 20), "Load Selected Room"))
-                    LoadRoom(directoryInfoList[selected]);
-
-                // Create unload button
-                if (GUI.Button(new Rect(10, 160, position.width - 20, 20), "Unload Selected Room"))
-                    UnloadRoom(directoryInfoList[selected]);
-
-                if (GUI.Button(new Rect(10, 185, position.width - 20, 20), "Select Mesh and split"))
-                {
-                    ms.Test();
-                }
-                if (GUI.Button(new Rect(10, 210, position.width - 20, 20), "Load BBox"))
-                {
-                    ms.Load();
-                }
-            }
-
-            // Create a delete all button
-            if (GUI.Button(new Rect(10, 260, position.width - 20, 20), "Delete All Rooms"))
-                deleteAllRooms();
-
-            Repaint();
-        }
 
         public List<GameObject> GetList()
         {
@@ -183,7 +124,7 @@ namespace ASL.UI.Menus.Scanning
 
             foreach (GameObject room in roomList)
             {
-                byte[] b = TangoDatabase.GetMeshAsBytes(TangoDatabase.GetRoomByName(room.name));
+                byte[] b = UWBNetworkingPackage.TangoDatabase.GetMeshAsBytes(UWBNetworkingPackage.TangoDatabase.GetRoomByName(room.name));
                 string roomFolder = Path.Combine(root.FullName, RoomName);
                 SetRoomFolder(roomFolder);
 
@@ -266,7 +207,7 @@ namespace ASL.UI.Menus.Scanning
                 results[i] = results[i].DesirializeBounds(readByteArray);
                 results[i].id = i - 1;
             }
-            
+
             return results;
         }
 
@@ -308,8 +249,8 @@ namespace ASL.UI.Menus.Scanning
 
                 file.filePath = f.FullName;
                 file.name = f.Name.Split('.')[0];
-                string extension = '.' + f.Name.Split('.')[numNameComponents-1];
-                
+                string extension = '.' + f.Name.Split('.')[numNameComponents - 1];
+
                 if (extension.Equals(Config.Current.Room.TangoFileExtension))
                 {
                     bool cached = false;
@@ -347,65 +288,6 @@ namespace ASL.UI.Menus.Scanning
             }
         }
 
-        private void OnEnable()
-        {
-            Initialize();
-            obj = GameObject.Find("SplitterManager");
-            ms = obj.AddComponent<MeshSplitterController>();
-        }
-
-        /// <summary>
-        /// Goes through each of the files to be loaded and load one per update
-        /// </summary>
-        [ExecuteInEditMode]
-        void Update()
-        {
-            if (FilesToLoad.Count > 0)
-            {
-                fileToLoad f = FilesToLoad.Pop();
-                ReadRoom(f.filePath, f.name);
-            }
-            
-            RegisterAllTangoRooms();
-            CullLists();
-        }
-        
-        [ExecuteInEditMode]
-        void OnDestroy()
-        {
-            Reset();
-        }
-
-        #region Helper Methods
-
-        private void Initialize()
-        {
-            SetDefaultRoomFolder();
-            Reset();
-
-            // Get all directories in the root directory
-            SetRoot();
-            foreach (DirectoryInfo d in root.GetDirectories())
-            {
-                if (IsTangoRoomDirectory(d))
-                {
-                    RegisterDirectory(d);
-                }
-            }
-
-            // Get all game objects with the "Room" tag
-            RegisterAllTangoRooms();
-
-        }
-
-        private void Reset()
-        {
-            // Clear all lists
-            roomList.Clear();
-            directoryInfoList.Clear();
-            directoryPathList.Clear();
-            roomNameList.Clear();
-        }
 
         private DirectoryInfo SetRoot()
         {
@@ -445,14 +327,14 @@ namespace ASL.UI.Menus.Scanning
                     TagTangoRoomDirectory();
                 }
             }
-            
+
             return dirInfo;
         }
 
         private bool DirectoryInfoRegistered(string roomFolder)
         {
             DirectoryInfo dirInfo = new DirectoryInfo(roomFolder);
-            
+
             bool registeredDirInfo = false;
             if (dirInfo != null)
             {
@@ -492,7 +374,7 @@ namespace ASL.UI.Menus.Scanning
 
         private void RegisterDirectory(DirectoryInfo dirInfo)
         {
-            if(dirInfo != null)
+            if (dirInfo != null)
             {
                 if (!directoryInfoList.Contains(dirInfo))
                 {
@@ -508,7 +390,7 @@ namespace ASL.UI.Menus.Scanning
             bool unregistered = false;
 
             DirectoryInfo dirInfo = null;
-            foreach(DirectoryInfo info in directoryInfoList)
+            foreach (DirectoryInfo info in directoryInfoList)
             {
                 if (info.FullName.Equals(roomFolder))
                 {
@@ -517,7 +399,7 @@ namespace ASL.UI.Menus.Scanning
                 }
             }
 
-            if(dirInfo != null)
+            if (dirInfo != null)
             {
                 string dirName = dirInfo.FullName;
                 if (directoryPathList.Contains(dirName))
@@ -537,7 +419,7 @@ namespace ASL.UI.Menus.Scanning
 
         private bool IsTangoRoom(GameObject go)
         {
-            if(go.tag == "Room")
+            if (go.tag == "Room")
             {
                 return true;
             }
@@ -565,7 +447,7 @@ namespace ASL.UI.Menus.Scanning
         {
             bool newRoomsRegistered = false;
 
-            foreach(GameObject go in GameObject.FindObjectsOfType<GameObject>())
+            foreach (GameObject go in GameObject.FindObjectsOfType<GameObject>())
             {
                 newRoomsRegistered = newRoomsRegistered || RegisterAsTangoRoom(go);
             }
@@ -577,7 +459,7 @@ namespace ASL.UI.Menus.Scanning
         {
             List<GameObject> currentAvailableRoomsList = new List<GameObject>();
 
-            foreach(GameObject go in GameObject.FindObjectsOfType<GameObject>())
+            foreach (GameObject go in GameObject.FindObjectsOfType<GameObject>())
             {
                 if (IsTangoRoom(go))
                 {
@@ -592,10 +474,10 @@ namespace ASL.UI.Menus.Scanning
             // FilesToLoad
 
             List<GameObject> roomsToRemove = new List<GameObject>();
-            foreach(GameObject room in roomList)
+            foreach (GameObject room in roomList)
             {
                 bool roomFound = false;
-                foreach(GameObject currentRoom in currentAvailableRoomsList)
+                foreach (GameObject currentRoom in currentAvailableRoomsList)
                 {
                     if (currentRoom.Equals(room))
                     {
@@ -610,10 +492,10 @@ namespace ASL.UI.Menus.Scanning
                 }
             }
 
-            foreach(GameObject roomToRemove in roomsToRemove)
+            foreach (GameObject roomToRemove in roomsToRemove)
             {
                 roomList.Remove(roomToRemove);
-                if(roomToRemove != null)
+                if (roomToRemove != null)
                 {
                     roomNameList.Remove(roomToRemove.name);
                 }
@@ -621,7 +503,7 @@ namespace ASL.UI.Menus.Scanning
 
             return roomsToRemove.Count > 0;
         }
-        
+
         private bool IsTangoRoomDirectory(DirectoryInfo dirInfo)
         {
             string tagPath = Path.Combine(dirInfo.FullName, Config.Current.Room.TagFilename);
@@ -645,15 +527,6 @@ namespace ASL.UI.Menus.Scanning
         }
 
         /// <summary>
-        /// Toolbar Declaration and window creation
-        /// </summary>
-        [MenuItem("ASL/Room Scanning/Room Manager Window")]
-        private static void showEditor()
-        {
-            GetWindow<RoomSave>(false, "Room Manager");
-        }
-
-        /// <summary>
         /// Reads the room game object from the file path and sends it to the TangoDatabase with it's name
         /// </summary>
         /// <param name="filePath"></param>
@@ -667,15 +540,92 @@ namespace ASL.UI.Menus.Scanning
         /// <summary>
         /// Deletes all Room gameobjects
         /// </summary>
-        private void deleteAllRooms()
+        public void DeleteAllRooms()
         {
-            foreach(GameObject g in roomList)
+            foreach (GameObject g in roomList)
             {
                 Destroy(g);
             }
         }
+        
+        private void Reset()
+        {
+            // Clear all lists
+            roomList.Clear();
+            directoryInfoList.Clear();
+            directoryPathList.Clear();
+            roomNameList.Clear();
+        }
+        
+        private void Initialize()
+        {
+            SetDefaultRoomFolder();
+            Reset();
+
+            // Get all directories in the root directory
+            SetRoot();
+            foreach (DirectoryInfo d in root.GetDirectories())
+            {
+                if (IsTangoRoomDirectory(d))
+                {
+                    RegisterDirectory(d);
+                }
+            }
+
+            // Get all game objects with the "Room" tag
+            RegisterAllTangoRooms();
+
+        }
+
+        [ExecuteInEditMode]
+        void OnDestroy()
+        {
+            Reset();
+        }
+        
+        private void OnEnable()
+        {
+            Initialize();
+            obj = GameObject.Find("SplitterManager");
+            //ms = obj.AddComponent<MeshSplitterController>();
+            ms = GameObject.FindObjectOfType<MeshSplitterController>();
+        }
+
+        /// <summary>
+        /// Goes through each of the files to be loaded and load one per update
+        /// </summary>
+        [ExecuteInEditMode]
+        void Update()
+        {
+            if (FilesToLoad.Count > 0)
+            {
+                fileToLoad f = FilesToLoad.Pop();
+                ReadRoom(f.filePath, f.name);
+            }
+
+            RegisterAllTangoRooms();
+            CullLists();
+        }
+
         #endregion
+
+        #region Properties
+        public List<GameObject> RoomList
+        {
+            get { return roomList; }
+        }
+        public List<DirectoryInfo> DirectoryInfoList
+        {
+            get { return directoryInfoList; }
+        }
+        public List<string> RoomNameList
+        {
+            get { return roomNameList; }
+        }
+        public MeshSplitterController SplitterController
+        {
+            get { return ms; }
+        }
         #endregion
     }
-#endif
 }

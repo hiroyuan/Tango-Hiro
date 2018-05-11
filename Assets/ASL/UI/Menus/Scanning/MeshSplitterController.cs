@@ -2,8 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;
 using System.IO;
+
+using ASL.Scanning.Tango;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 public class MeshSplitterController : MonoBehaviour {
     public BoundingBoxSystem areaBound;
@@ -11,7 +16,7 @@ public class MeshSplitterController : MonoBehaviour {
     public BoundingBoxSystem loadedBounds;
     public List<GameObject> specificMeshes;
     public GameObject indicator;
-    public Transform trans;
+//    public Transform trans;
     public LoadedMeshHolder[] loadedMeshes;
 
     public int x_area = 1;
@@ -21,17 +26,24 @@ public class MeshSplitterController : MonoBehaviour {
     public int y_mesh = 1;
     public int z_mesh = 1;
 
-    private RoomSave rs;
+    private RoomSaveLogic rs;
 
     // Use this for initialization
     void Start ()
     {
-        rs = (RoomSave)EditorWindow.GetWindow(typeof(RoomSave));
+        //rs = (RoomSaveLogic)EditorWindow.GetWindow(typeof(RoomSaveLogic));
+        getRoomSaveLogic();
+
         specificMeshes = new List<GameObject>();
         indicator = GameObject.Find("IndicatorObject");
 
         areaBound = new BoundingBoxSystem(rs.GetList(), x_area, y_area, z_area);
         areaBound.SplitBounds(false);
+    }
+
+    private void getRoomSaveLogic()
+    {
+        rs = GameObject.FindObjectOfType<RoomSaveLogic>();
     }
 	
 	// Update is called once per frame

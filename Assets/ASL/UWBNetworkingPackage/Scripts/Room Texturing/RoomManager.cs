@@ -4,13 +4,17 @@ using UnityEngine;
 using System.IO;
 using System;
 
+using ASL.Scanning.Tango;
+
 namespace UWBNetworkingPackage
 {
     public class RoomManager : MonoBehaviour
     {
         public string RoomName;
         public Bounds bounds;
-        public ASL.UI.Menus.Scanning.RoomSave rs;
+        public ASL.UI.Menus.Scanning.RoomSaveEditorWindow rs;
+        //public RoomSaveLogic rs;
+
         public static class Messages
         {
             public static class Errors
@@ -28,8 +32,15 @@ namespace UWBNetworkingPackage
             }
 
             InvokeRepeating("UpdateRoomBundles", 0, 3);
-            rs = ScriptableObject.CreateInstance("ASL.UI.Menus.Scanning.RoomSave") as ASL.UI.Menus.Scanning.RoomSave;
-            bounds = rs.bounds;
+        }
+
+        public void Awake()
+        {
+            //rs = ScriptableObject.CreateInstance("ASL.UI.Menus.Scanning.RoomSave") as ASL.UI.Menus.Scanning.RoomSaveEditorWindow;
+            rs = ScriptableObject.CreateInstance("ASL.UI.Menus.Scanning.RoomSaveEditorWindow") as ASL.UI.Menus.Scanning.RoomSaveEditorWindow;
+            rs.SetRoomSaveLogicScript();
+            //bounds = rs.bounds;
+            bounds = rs.roomSaveLogic_m.bounds;
         }
 
         void FixedUpdate()

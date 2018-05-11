@@ -4,6 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using System.Collections;
 
+#if UNITY_EDITOR
 namespace ASL
 {
     public class TagsAndLayers
@@ -211,3 +212,4 @@ namespace ASL
         }
     }
 }
+#endif
