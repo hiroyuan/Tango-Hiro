@@ -38,7 +38,7 @@ namespace ASL.UI.Menus.Scanning
             RoomName = EditorGUI.TextField(new Rect(10, 25, position.width - 20, 20),
                     "Room Name: ",
                     RoomName);
-            
+            roomSaveLogic_m.RoomName = RoomName;
             // Create a save Rooms button and link it to the function
             if (GUI.Button(new Rect(10, 50, position.width - 20, 20), "Save Rooms"))
                 roomSaveLogic_m.SaveRooms(roomList, directoryInfoList);
@@ -56,7 +56,7 @@ namespace ASL.UI.Menus.Scanning
                 // Get the currently selected item in the drop down
                 //selected = EditorGUI.Popup(new Rect(10, 110, position.width - 20, 20), selected, DirNames.ToArray());
                 selected = EditorGUI.Popup(new Rect(10, 110, position.width - 20, 20), selected, roomNameList.ToArray());
-
+				roomSaveLogic_m.selected = selected;
                 // Create load button
                 if (GUI.Button(new Rect(10, 135, position.width - 20, 20), "Load Selected Room"))
                     roomSaveLogic_m.LoadRoom(directoryInfoList[selected]);

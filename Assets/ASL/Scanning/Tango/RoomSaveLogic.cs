@@ -55,7 +55,7 @@ namespace ASL.Scanning.Tango
         /// <summary>
         /// Room drop down value (i.e. index of room is selected)
         /// </summary>
-        private int selected = 0;
+		public int selected = 0;
 
         /// <summary>
         /// Stack to keep track of room loading
@@ -151,6 +151,7 @@ namespace ASL.Scanning.Tango
             {
                 string filename = "areaBound.dat";
                 string filepath = Path.Combine(RoomFolder, filename);
+                UnityEngine.Debug.Log(filepath);
 
                 byte[] data = ms.areaBound.GetSubBounds()[areaBoundIndex].SerializeBounds();
                 File.WriteAllBytes(filepath, data);
@@ -293,6 +294,7 @@ namespace ASL.Scanning.Tango
         {
 #if UNITY_EDITOR
             root = new DirectoryInfo(Config.Current.Room.CompileAbsoluteAssetDirectory());
+            //UnityEngine.Debug.Log(root);
 #else
             root = new DirectoryInfo(Config.Current.Room.CompileUnityAssetDirectory());
 #endif

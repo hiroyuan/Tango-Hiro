@@ -1,10 +1,10 @@
 ﻿// Script taken ctwheels' work from https://answers.unity.com/questions/33597/is-it-possible-to-create-a-tag-programmatically.html
-
+#if UNITY_EDITOR
 using UnityEditor;
 using UnityEngine;
 using System.Collections;
 
-#if UNITY_EDITOR
+
 namespace ASL
 {
     public class TagsAndLayers
