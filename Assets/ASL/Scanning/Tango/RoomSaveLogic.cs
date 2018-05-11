@@ -172,7 +172,9 @@ namespace ASL.Scanning.Tango
                     fileCount++;
                 }
             }
+			#if UNITY_EDITOR
             UnityEditor.AssetDatabase.Refresh();
+			#endif
         }
 
         public BoundHolder[] LoadBoundingBox(DirectoryInfo Dir)

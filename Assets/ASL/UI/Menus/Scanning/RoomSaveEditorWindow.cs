@@ -11,9 +11,10 @@ using UnityEditor;
 
 using UWBNetworkingPackage;
 
-#if UNITY_EDITOR
+
 namespace ASL.UI.Menus.Scanning
 {
+	#if UNITY_EDITOR
     public class RoomSaveEditorWindow : EditorWindow
     {
         public ASL.Scanning.Tango.RoomSaveLogic roomSaveLogic_m;
@@ -102,5 +103,5 @@ namespace ASL.UI.Menus.Scanning
         #endregion
         #endregion
     }
+	#endif
 }
-#endif

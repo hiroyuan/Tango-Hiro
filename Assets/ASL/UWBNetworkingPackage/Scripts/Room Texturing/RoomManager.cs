@@ -12,7 +12,9 @@ namespace UWBNetworkingPackage
     {
         public string RoomName;
         public Bounds bounds;
+		#if UNITY_EDITOR
         public ASL.UI.Menus.Scanning.RoomSaveEditorWindow rs;
+		#endif
         //public RoomSaveLogic rs;
 
         public static class Messages
@@ -36,12 +38,19 @@ namespace UWBNetworkingPackage
 
         public void Awake()
         {
-            //rs = ScriptableObject.CreateInstance("ASL.UI.Menus.Scanning.RoomSave") as ASL.UI.Menus.Scanning.RoomSaveEditorWindow;
-            rs = ScriptableObject.CreateInstance("ASL.UI.Menus.Scanning.RoomSaveEditorWindow") as ASL.UI.Menus.Scanning.RoomSaveEditorWindow;
-            rs.SetRoomSaveLogicScript();
-            //bounds = rs.bounds;
-            bounds = rs.roomSaveLogic_m.bounds;
+			AwakeUnityEditorComponent ();
         }
+
+		public void AwakeUnityEditorComponent()
+		{
+			#if UNITY_EDITOR
+			//rs = ScriptableObject.CreateInstance("ASL.UI.Menus.Scanning.RoomSave") as ASL.UI.Menus.Scanning.RoomSaveEditorWindow;
+			rs = ScriptableObject.CreateInstance("ASL.UI.Menus.Scanning.RoomSaveEditorWindow") as ASL.UI.Menus.Scanning.RoomSaveEditorWindow;
+			rs.SetRoomSaveLogicScript();
+			//bounds = rs.bounds;
+			bounds = rs.roomSaveLogic_m.bounds;
+			#endif
+		}
 
         void FixedUpdate()
         {
