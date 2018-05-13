@@ -6,15 +6,16 @@ using System;
 
 public class BoundHolder {
     public Bounds subBound;
-    private List<Vector3> partialVertices;
-    private List<Vector3> partialNormals;
-    private List<Color> partialColor;
-    private List<Vector2> partialUVs;
-    private List<int> newTriangles;
-
-    private VertexLookUp map;
+    //private List<Vector3> partialVertices;
+    //private List<Vector3> partialNormals;
+    //private List<Color> partialColor;
+    //private List<Vector2> partialUVs;
+    //private List<int> newTriangles;
+    //private VertexLookUp map;
     private bool isActive;
-    public Mesh mesh;
+
+    public Mesh[] meshInBBox;
+    public Dictionary<int, MeshInBBox> meshes = new Dictionary<int, MeshInBBox>();
     public int id;
 
     public BoundHolder()
@@ -25,29 +26,7 @@ public class BoundHolder {
     public BoundHolder(Vector3 center, Vector3 size)
     {
         subBound = new Bounds(center, size);
-    }
-
-    //public BoundHolder(Vector3 center, Vector3 size, List<GameObject> roomList)
-    //{
-    //    subBound = new Bounds(center, size);
-    //    foreach (GameObject go in roomList)
-    //    {
-
-    //    }
-    //}
-
-    public BoundHolder(Vector3 center, Vector3 size, Mesh m, int amtOfSubBounds)
-    {
-        subBound = new Bounds(center, size);
-        partialVertices = new List<Vector3>(2 * (m.vertices.Length / amtOfSubBounds));
-        partialNormals = new List<Vector3>(2 * (m.normals.Length / amtOfSubBounds));
-        partialColor = new List<Color>(2 * (m.colors.Length / amtOfSubBounds));
-        //partialUVs = new List<Vector2>(2 * (m.uv.Length / amtOfSubBounds));
-        newTriangles = new List<int>(2 * (m.triangles.Length / amtOfSubBounds));
-
-        map = new VertexLookUp(m, amtOfSubBounds);
         isActive = false;
-        mesh = new Mesh();
     }
 
     public bool GetStatus()
@@ -69,36 +48,6 @@ public class BoundHolder {
         return false;
     }
 
-    public void AddTriangle(int[] triangle, Vector3[] vs, Vector3[] ns, Color[] cs, int[] ts)
-    {
-        for (int index = 0; index < triangle.Length; index++)
-        {
-            int vertexIndex = triangle[index];
-            if (!map.IsOldIndexInLookUp(vertexIndex))
-            {
-                // vertexIndex is new to this BoundHolder
-                map.AddOldIndex(vertexIndex);
-                partialVertices.Add(vs[vertexIndex]);
-                partialNormals.Add(ns[vertexIndex]);
-                if (cs.Length != 0)
-                    partialColor.Add(cs[vertexIndex]);
-            }
-            int newIndex = map.FindValue(triangle[index]);
-            newTriangles.Add(newIndex);
-        }
-    }
-
-    public Mesh SetThenGetMesh()
-    {
-        mesh.vertices = partialVertices.ToArray();
-        mesh.normals = partialNormals.ToArray();
-        mesh.colors = partialColor.ToArray();
-        //mesh.uv = partialUVs.ToArray();
-        mesh.triangles = newTriangles.ToArray();
-
-        return mesh;
-    }
-
     public byte[] Serialize()
     {
         using (MemoryStream ms = new MemoryStream())
@@ -106,7 +55,7 @@ public class BoundHolder {
             using (BinaryWriter bw = new BinaryWriter(ms))
             {
                 writeBounds(bw, subBound);
-                writeMesh(bw, mesh);
+                writeMesh(bw, meshes);
             }
 
             return ms.ToArray();
@@ -134,7 +83,7 @@ public class BoundHolder {
             using (BinaryReader br = new BinaryReader(ms))
             {
                 result.subBound = readBounds(br);
-                result.mesh = readMesh(br);
+                result.meshInBBox = readMesh(br);
             }
             return result;
         }
@@ -155,14 +104,12 @@ public class BoundHolder {
 
     public BoundHolder DesirializeMeshes(byte[] data)
     {
-        //byte[] meshesData = new byte[data.Length - 24];
-        //Array.Copy(data, 24, meshesData, 0, meshesData.Length);
         BoundHolder result = new BoundHolder();
         using (MemoryStream ms = new MemoryStream(data))
         {
             using (BinaryReader br = new BinaryReader(ms))
             {
-                result.mesh = readMesh(br);
+                result.meshInBBox = readMesh(br);
             }
             return result;
         }
@@ -191,69 +138,81 @@ public class BoundHolder {
         return result;
     }
 
-    private void writeMesh(BinaryWriter bw, Mesh m)
+    private void writeMesh(BinaryWriter bw, Dictionary<int, MeshInBBox> m)
     {
-        // make copy of mesh arrays
-        Vector3[] copyVertices = m.vertices;
-        Vector3[] copyNormals = m.normals;
-        Color[] copyColors = m.colors;
-        int[] copyTriangles = m.triangles;
+        bw.Write(m.Count); // to write how many meshee are there
+        foreach (KeyValuePair<int, MeshInBBox> entry in m) {
+            // make copy of mesh arrays
+            Vector3[] copyVertices = entry.Value.partialVertices.ToArray();
+            Vector3[] copyNormals = entry.Value.partialNormals.ToArray();
+            Color[] copyColors = entry.Value.partialColor.ToArray();
+            int[] copyTriangles = entry.Value.newTriangles.ToArray();
 
-        // write the length of arrays first so that I can generate proper array length when I read back
-        bw.Write(copyVertices.Length);
-        bw.Write(copyNormals.Length);
-        bw.Write(copyColors.Length);
-        bw.Write(copyTriangles.Length);
+            // write the length of arrays first so that I can generate proper array length when I read back
+            bw.Write(copyVertices.Length);
+            bw.Write(copyNormals.Length);
+            bw.Write(copyColors.Length);
+            bw.Write(copyTriangles.Length);
 
-        int index = 0;
-        foreach (Vector3 vertex in copyVertices)
-        { 
-            bw.Write(copyVertices[index].x);
-            bw.Write(copyVertices[index].y);
-            bw.Write(copyVertices[index].z);
-            bw.Write(copyNormals[index].x);
-            bw.Write(copyNormals[index].y);
-            bw.Write(copyNormals[index].z);
-            bw.Write(copyColors[index].r);
-            bw.Write(copyColors[index].g);
-            bw.Write(copyColors[index].b);
-            bw.Write(copyColors[index].a);
-            index++;
-        }
+            int index = 0;
+            foreach (Vector3 vertex in copyVertices)
+            {
+                bw.Write(copyVertices[index].x);
+                bw.Write(copyVertices[index].y);
+                bw.Write(copyVertices[index].z);
+                bw.Write(copyNormals[index].x);
+                bw.Write(copyNormals[index].y);
+                bw.Write(copyNormals[index].z);
+                bw.Write(copyColors[index].r);
+                bw.Write(copyColors[index].g);
+                bw.Write(copyColors[index].b);
+                bw.Write(copyColors[index].a);
+                index++;
+            }
 
-        index = 0;
-        foreach (int triangleIndex in copyTriangles)
-        {
-            bw.Write(copyTriangles[index]);
-            index++;
+            index = 0;
+            foreach (int triangleIndex in copyTriangles)
+            {
+                bw.Write(copyTriangles[index]);
+                index++;
+            }
         }
     }
 
-    private Mesh readMesh(BinaryReader br)
+    private Mesh[] readMesh(BinaryReader br)
     {
-        Mesh result = new Mesh();
-
-        Vector3[] vertices = new Vector3[br.ReadInt32()];
-        Vector3[] normals = new Vector3[br.ReadInt32()];
-        Color[] colors = new Color[br.ReadInt32()];
-        int[] triangles = new int[br.ReadInt32()];
-
-        for (int index = 0; index < vertices.Length; index++)
+        int count = br.ReadInt32();
+        Mesh[] results = new Mesh[count];
+        // instantiate
+        for (int i = 0; i < results.Length; i++)
         {
-            vertices[index] = new Vector3(br.ReadSingle(), br.ReadSingle(), br.ReadSingle());
-            normals[index] = new Vector3(br.ReadSingle(), br.ReadSingle(), br.ReadSingle());
-            colors[index] = new Color(br.ReadSingle(), br.ReadSingle(), br.ReadSingle(), br.ReadSingle());
-        }
-        for(int index =0; index < triangles.Length; index++)
-        {
-            triangles[index] = br.ReadInt32();
+            results[i] = new Mesh();
         }
 
-        result.vertices = vertices;
-        result.normals = normals;
-        result.colors = colors;
-        result.triangles = triangles;
+        for (int i = 0; i < results.Length; i++)
+        {
+            Vector3[] vertices = new Vector3[br.ReadInt32()];
+            Vector3[] normals = new Vector3[br.ReadInt32()];
+            Color[] colors = new Color[br.ReadInt32()];
+            int[] triangles = new int[br.ReadInt32()];
 
-        return result;
+            for (int index = 0; index < vertices.Length; index++)
+            {
+                vertices[index] = new Vector3(br.ReadSingle(), br.ReadSingle(), br.ReadSingle());
+                normals[index] = new Vector3(br.ReadSingle(), br.ReadSingle(), br.ReadSingle());
+                colors[index] = new Color(br.ReadSingle(), br.ReadSingle(), br.ReadSingle(), br.ReadSingle());
+            }
+            for (int index = 0; index < triangles.Length; index++)
+            {
+                triangles[index] = br.ReadInt32();
+            }
+
+            results[i].vertices = vertices;
+            results[i].normals = normals;
+            results[i].colors = colors;
+            results[i].triangles = triangles;
+        }
+
+        return results;
     }
 }

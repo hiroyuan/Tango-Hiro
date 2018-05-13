@@ -13,6 +13,9 @@ public class BoundingBoxSystem {
     private Transform trans;
     private Mesh mesh;
 
+    private Mesh[] meshesInBBox;
+    private Transform[] transInBBox;
+
     public BoundingBoxSystem()
     {
         
@@ -26,7 +29,6 @@ public class BoundingBoxSystem {
     public BoundingBoxSystem(Bounds b, int x, int y, int z)
     {
         bounds = b;
-        //bounds = new SerializableBounds(DrawBoundingBox(list));
         xDirCount = x;
         yDirCount = y;
         zDirCount = z;
@@ -36,17 +38,23 @@ public class BoundingBoxSystem {
     public BoundingBoxSystem(List<GameObject> list, int x, int y, int z)
     {
         bounds = DrawBoundingBox(list);
-        //bounds = new SerializableBounds(DrawBoundingBox(list));
         xDirCount = x;
         yDirCount = y;
         zDirCount = z;
         subBounds = new BoundHolder[xDirCount * yDirCount * zDirCount];
+
+        meshesInBBox = new Mesh[list.Count];
+        transInBBox = new Transform[list.Count];
+        for (int i = 0; i < list.Count; i++)
+        {
+            meshesInBBox[i] = list[i].GetComponent<MeshFilter>().mesh;
+            transInBBox[i] = list[i].transform;
+        }
     }
 
     public BoundingBoxSystem(List<GameObject> list, int x, int y, int z, Transform t, Mesh m)
     {
         bounds = DrawBoundingBox(list);
-        //bounds = new SerializableBounds(DrawBoundingBox(list));
         xDirCount = x;
         yDirCount = y;
         zDirCount = z;
@@ -153,9 +161,9 @@ public class BoundingBoxSystem {
                 {
                     subCenter = new Vector3(xStartPoint + sizeX / 2, yStartPoint + sizeY / 2, zStartPoint + sizeZ / 2);
                     if (isNormalBounds)
-                        subBounds[index++] = new BoundHolder(subCenter, subSize, mesh, xDirCount * yDirCount * zDirCount);
-                    else
                         subBounds[index++] = new BoundHolder(subCenter, subSize);
+                    //else
+                    //    subBounds[index++] = new BoundHolder(subCenter, subSize);
                     xStartPoint += sizeX;
                 }
                 xStartPoint = bounds.min.x;
@@ -169,7 +177,7 @@ public class BoundingBoxSystem {
 
     public void SplitMesh()
     {
-        putTrianglesIntoBoundingBox(mesh);
+        putTrianglesIntoBoundingBox(meshesInBBox, transInBBox);
         drawNewMesh();
     }
 
@@ -292,53 +300,87 @@ public class BoundingBoxSystem {
         return subBounds[indexOfSubBounds];
     }
 
-    private void putTrianglesIntoBoundingBox(Mesh m)
+    //private void putTrianglesIntoBoundingBox(Mesh m)
+    //{
+    //    int vertexIndex = 0;
+    //    BoundHolder b = null;
+    //    int[] triangle = new int[3];
+
+    //    Vector3[] verticesCopy = m.vertices;
+    //    Vector3[] normalsCopy = m.normals;
+    //    Color[] colorsCopy = m.colors;
+    //    int[] trianglesCopy = m.triangles;
+
+    //    for (int index = 0; index < trianglesCopy.Length; index += 3)
+    //    {
+    //        vertexIndex = trianglesCopy[0 + index];
+    //        Vector3 worldPoint = trans.TransformPoint(verticesCopy[vertexIndex]);
+    //        b = FindBoundingBox(worldPoint);
+    //        triangle[0] = trianglesCopy[0 + index];
+    //        triangle[1] = trianglesCopy[1 + index];
+    //        triangle[2] = trianglesCopy[2 + index];
+    //        b.AddTriangle(triangle, verticesCopy, normalsCopy, colorsCopy, trianglesCopy);
+    //    }
+    //}
+
+    private void putTrianglesIntoBoundingBox(Mesh[] meshes, Transform[] transforms)
     {
-        int vertexIndex = 0;
-        BoundHolder b = null;
-        int[] triangle = new int[3];
-
-        Vector3[] verticesCopy = m.vertices;
-        Vector3[] normalsCopy = m.normals;
-        Color[] colorsCopy = m.colors;
-        int[] trianglesCopy = m.triangles;
-
-        for (int index = 0; index < trianglesCopy.Length; index += 3)
+        for (int i = 0; i < meshes.Length; i++)
         {
-            vertexIndex = trianglesCopy[0 + index];
-            Vector3 worldPoint = trans.TransformPoint(verticesCopy[vertexIndex]);
-            b = FindBoundingBox(worldPoint);
-            triangle[0] = trianglesCopy[0 + index];
-            triangle[1] = trianglesCopy[1 + index];
-            triangle[2] = trianglesCopy[2 + index];
-            b.AddTriangle(triangle, verticesCopy, normalsCopy, colorsCopy, trianglesCopy);
-        }
+            int vertexIndex = 0;
+            BoundHolder b = null;
+            int[] triangle = new int[3];
 
-        //for (int index = 0; index < m.triangles.Length/*256965*/; index += 3)
-        //{
-        //    vertexIndex = m.triangles[0 + index];
-        //    Vector3 worldPoint = trans.TransformPoint(m.vertices[vertexIndex]);
-        //    b = FindBoundingBox(/*m.vertices[vertexIndex]*/worldPoint);
-        //    triangle[0] = m.triangles[0 + index];
-        //    triangle[1] = m.triangles[1 + index];
-        //    triangle[2] = m.triangles[2 + index];
-        //    b.AddTriangle(triangle, m);
-        //}
+            Vector3[] verticesCopy = meshes[i].vertices;
+            Vector3[] normalsCopy = meshes[i].normals;
+            Color[] colorsCopy = meshes[i].colors;
+            int[] trianglesCopy = meshes[i].triangles;
+            
+
+            for (int index = 0; index < trianglesCopy.Length; index += 3)
+            {
+                vertexIndex = trianglesCopy[0 + index];
+                Vector3 worldPoint = transforms[i].TransformPoint(verticesCopy[vertexIndex]);
+                b = FindBoundingBox(worldPoint);
+
+                triangle[0] = trianglesCopy[0 + index];
+                triangle[1] = trianglesCopy[1 + index];
+                triangle[2] = trianglesCopy[2 + index];
+
+                if (!(b.meshes.ContainsKey(i)))
+                {
+                    MeshInBBox m = new MeshInBBox(i);
+                    m.AddArrays(triangle, verticesCopy, normalsCopy, colorsCopy, trianglesCopy);
+                    b.meshes.Add(i, m);
+                }
+                else
+                {
+                    b.meshes[i].AddArrays(triangle, verticesCopy, normalsCopy, colorsCopy, trianglesCopy);
+                }
+            }
+            
+        }
     }
 
     private void drawNewMesh()
     {
-        int index = 0;
         foreach (BoundHolder b in subBounds)
         {
-            GameObject newGameObject = new GameObject();
-            MeshFilter mf = newGameObject.AddComponent<MeshFilter>();
-            mf.name = "NewMesh" + index;
-            MeshRenderer mr = newGameObject.AddComponent<MeshRenderer>();
+            int index = 0;
+            foreach (MeshInBBox m in b.meshes.Values)
+            {
+                GameObject newGameObject = new GameObject();
+                MeshFilter mf = newGameObject.AddComponent<MeshFilter>();
+                mf.name = "NewMesh";
+                MeshRenderer mr = newGameObject.AddComponent<MeshRenderer>();
 
-            mf.mesh = b.SetThenGetMesh();
-            mr.material = new Material(Shader.Find("Custom/UnlitVertexColor"));
-            index++;
+                mf.mesh.vertices = m.partialVertices.ToArray();
+                mf.mesh.normals = m.partialNormals.ToArray();
+                mf.mesh.colors = m.partialColor.ToArray();
+                mf.mesh.triangles = m.newTriangles.ToArray();
+                mr.material = new Material(Shader.Find("Custom/UnlitVertexColor"));
+                index++;
+            }
         }
     }
 }

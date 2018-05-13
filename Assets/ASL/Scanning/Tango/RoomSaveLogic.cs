@@ -146,32 +146,44 @@ namespace ASL.Scanning.Tango
             string roomFolder = Path.Combine(root.FullName, RoomName);
             SetRoomFolder(roomFolder);
 
-            int areaBoundIndex = 0;
+            //int areaBoundIndex = 0;
+            //foreach (BoundHolder b in ms.areaBound.GetSubBounds())
+            //{
+            //    string filename = "areaBound.dat";
+            //    string filepath = Path.Combine(RoomFolder, filename);
+            //    UnityEngine.Debug.Log(filepath);
+
+            //    byte[] data = ms.areaBound.GetSubBounds()[areaBoundIndex].SerializeBounds();
+            //    File.WriteAllBytes(filepath, data);
+            //}
+
+            //int fileCount = 0;
+            //for (int boundsIndex = 0; boundsIndex < ms.areaBound.GetSubBounds().Length; boundsIndex++)
+            //{
+            //    int i = 0;
+            //    foreach (BoundHolder b in ms.meshBounds[boundsIndex].GetSubBounds())
+            //    {
+            //        string filename = "Mesh_With_BoundingBox_" + fileCount + ".dat";
+            //        string filepath = Path.Combine(RoomFolder, filename);
+
+            //        byte[] data = ms.meshBounds[boundsIndex].GetSubBounds()[i].Serialize();
+            //        File.WriteAllBytes(filepath, data);
+            //        i++;
+            //        fileCount++;
+            //    }
+            //}
+
+            int i = 0;
             foreach (BoundHolder b in ms.areaBound.GetSubBounds())
             {
-                string filename = "areaBound.dat";
+                string filename = "Mesh_With_BoundingBox_" + i + ".dat";
                 string filepath = Path.Combine(RoomFolder, filename);
-                UnityEngine.Debug.Log(filepath);
 
-                byte[] data = ms.areaBound.GetSubBounds()[areaBoundIndex].SerializeBounds();
+                byte[] data = ms.areaBound.GetSubBounds()[i].Serialize();
                 File.WriteAllBytes(filepath, data);
+                i++;
             }
 
-            int fileCount = 0;
-            for (int boundsIndex = 0; boundsIndex < ms.meshBounds.Count; boundsIndex++)
-            {
-                int i = 0;
-                foreach (BoundHolder b in ms.meshBounds[boundsIndex].GetSubBounds())
-                {
-                    string filename = "Mesh_With_BoundingBox_" + fileCount + ".dat";
-                    string filepath = Path.Combine(RoomFolder, filename);
-
-                    byte[] data = ms.meshBounds[boundsIndex].GetSubBounds()[i].Serialize();
-                    File.WriteAllBytes(filepath, data);
-                    i++;
-                    fileCount++;
-                }
-            }
 			#if UNITY_EDITOR
             UnityEditor.AssetDatabase.Refresh();
 			#endif
@@ -193,22 +205,22 @@ namespace ASL.Scanning.Tango
             }
 
             BoundHolder[] results = new BoundHolder[countOfFiles];
-            string areafilename = "areaBound.dat";
-            string areafilepath = Path.Combine(directoryPath, areafilename);
-            byte[] areaByteArray = File.ReadAllBytes(areafilepath);
-            results[0] = new BoundHolder();
-            results[0] = results[0].DesirializeBounds(areaByteArray);
+            //string areafilename = "areaBound.dat";
+            //string areafilepath = Path.Combine(directoryPath, areafilename);
+            //byte[] areaByteArray = File.ReadAllBytes(areafilepath);
+            //results[0] = new BoundHolder();
+            //results[0] = results[0].DesirializeBounds(areaByteArray);
 
-            //UnityEngine.Debug.Log(countOfFiles);
-            for (int i = 1; i < countOfFiles; i++)
+            ////UnityEngine.Debug.Log(countOfFiles);
+            for (int i = 0; i < countOfFiles; i++)
             {
-                string filename = "Mesh_With_BoundingBox_" + (i - 1) + extension;
+                string filename = "Mesh_With_BoundingBox_" + i + extension;
                 string filepath = Path.Combine(directoryPath, filename);
 
                 byte[] readByteArray = File.ReadAllBytes(filepath);
                 results[i] = new BoundHolder();
                 results[i] = results[i].DesirializeBounds(readByteArray);
-                results[i].id = i - 1;
+                results[i].id = i;
             }
 
             return results;

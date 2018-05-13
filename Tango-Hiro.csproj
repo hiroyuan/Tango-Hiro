@@ -739,6 +739,7 @@
     <Compile Include="Assets\ASL\Room_Texture\Scripts\Tango\MarkerAlignmentObject.cs" />
     <Compile Include="Assets\ASL\Room_Texture\Scripts\Tango\TangoMarkerDetector.cs" />
     <Compile Include="Assets\ASL\Room_Texture\Scripts\Tango\switchCamera.cs" />
+    <Compile Include="Assets\ASL\Scanning\Tango\RoomSaveLogic.cs" />
     <Compile Include="Assets\ASL\UI\Menus\Networking\DemoSceneLoader.cs" />
     <Compile Include="Assets\ASL\UI\Menus\Networking\PlatformSelector.cs" />
     <Compile Include="Assets\ASL\UI\Menus\Networking\SceneVariableSetter.cs" />
@@ -747,8 +748,9 @@
     <Compile Include="Assets\ASL\UI\Menus\Scanning\Controller.cs" />
     <Compile Include="Assets\ASL\UI\Menus\Scanning\LoadedMeshHolder.cs" />
     <Compile Include="Assets\ASL\UI\Menus\Scanning\MeshHolder.cs" />
+    <Compile Include="Assets\ASL\UI\Menus\Scanning\MeshInBBox.cs" />
     <Compile Include="Assets\ASL\UI\Menus\Scanning\MeshSplitterController.cs" />
-    <Compile Include="Assets\ASL\UI\Menus\Scanning\RoomSave.cs" />
+    <Compile Include="Assets\ASL\UI\Menus\Scanning\RoomSaveEditorWindow.cs" />
     <Compile Include="Assets\ASL\UI\Menus\Scanning\VertexLookUp.cs" />
     <Compile Include="Assets\ASL\UI\Menus\Vive\CustomRadialMenu.cs" />
     <Compile Include="Assets\ASL\UI\Networking\ConnectionNotifier.cs" />

@@ -3,10 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class LoadedMeshHolder {
-    public Mesh mesh;
+    public Mesh[] meshes;
 
     public LoadedMeshHolder(BoundHolder bh)
     {
-        mesh = bh.mesh;
+        meshes = bh.meshInBBox;
     }
 }

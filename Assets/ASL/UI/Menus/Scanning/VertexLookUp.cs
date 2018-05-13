@@ -13,6 +13,18 @@ public class VertexLookUp {
         newIndex = 0;
     }
 
+    public VertexLookUp(Mesh m)
+    {
+        dictionary = new Dictionary<int, int>(m.vertexCount);
+        newIndex = 0;
+    }
+
+    public VertexLookUp()
+    {
+        dictionary = new Dictionary<int, int>();
+        newIndex = 0;
+    }
+
     public bool IsOldIndexInLookUp(int oldVertex)
     {
         return dictionary.ContainsKey(oldVertex);

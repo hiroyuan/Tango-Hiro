@@ -19,12 +19,10 @@ public class MeshSplitterController : MonoBehaviour {
 //    public Transform trans;
     public LoadedMeshHolder[] loadedMeshes;
 
-    public int x_area = 1;
+    public int x_area = 5;
     public int y_area = 1;
-    public int z_area = 1;
-    public int x_mesh = 2;
-    public int y_mesh = 1;
-    public int z_mesh = 1;
+    public int z_area = 10;
+
 
     private RoomSaveLogic rs;
 
@@ -37,8 +35,8 @@ public class MeshSplitterController : MonoBehaviour {
         specificMeshes = new List<GameObject>();
         indicator = GameObject.Find("IndicatorObject");
 
-        areaBound = new BoundingBoxSystem(rs.GetList(), x_area, y_area, z_area);
-        areaBound.SplitBounds(false);
+        //areaBound = new BoundingBoxSystem(rs.GetList(), x_area, y_area, z_area);
+        //areaBound.SplitBounds(true);
     }
 
     private void getRoomSaveLogic()
@@ -49,21 +47,6 @@ public class MeshSplitterController : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
     {
-        if (rs.GetList() != null)
-        {
-            areaBound = new BoundingBoxSystem(rs.GetList(), x_area, y_area, z_area);
-            areaBound.SplitBounds(false);
-        }
-
-        //areaBound.SetSplitter(rs.GetList(), x_area, y_area, z_area);
-        //areaBound.SplitBounds();
-
-        //if (loadedBound != null)
-        //{
-        //    loadedBound = new BoundingBoxSystem(loadedBBox, x_area, y_area, z_area);
-        //    loadedBound.SplitBounds();
-        //}
-
         if (loadedBounds != null)
         {
             loadedBounds.ActivateSubBoundsByIndicator(indicator);
@@ -71,30 +54,32 @@ public class MeshSplitterController : MonoBehaviour {
             {
                 if (loadedBounds.GetSubBounds()[i].GetStatus())
                 {
-                    if (GameObject.Find("NewMesh" + i) == null)
+                    if (GameObject.Find("MeshInBoundingBox_" + i) == null)
                     {
                         if (loadedMeshes[i] == null)
                             LoadMesh(i);
 
-                        GameObject obj = new GameObject();
-                        MeshFilter mf = obj.AddComponent<MeshFilter>();
-                        mf.name = "NewMesh" + i;
-                        mf.mesh = loadedMeshes[i].mesh;
-                        MeshRenderer mr = obj.AddComponent<MeshRenderer>();
-                        mr.material = new Material(Shader.Find("Custom/UnlitVertexColor"));
+                        for (int j = 0; j < loadedMeshes[i].meshes.Length; j++)
+                        {
+                            GameObject obj = new GameObject();
+                            MeshFilter mf = obj.AddComponent<MeshFilter>();
+                            mf.name = "MeshInBoundingBox_" + i;
+                            mf.mesh = loadedMeshes[i].meshes[j];
+                            MeshRenderer mr = obj.AddComponent<MeshRenderer>();
+                            mr.material = new Material(Shader.Find("Custom/UnlitVertexColor"));
+                        }
                     }
                 }
                 else
                 {
-                    if (GameObject.Find("NewMesh" + i) != null)
+                    if (GameObject.Find("MeshInBoundingBox_" + i) != null)
                     {
-                        GameObject obj = GameObject.Find("NewMesh" + i);
+                        GameObject obj = GameObject.Find("MeshInBoundingBox_" + i);
                         Destroy(obj);
                     }
                 }
             }
         }
-
     }
 
     void OnDrawGizmos()
@@ -107,48 +92,20 @@ public class MeshSplitterController : MonoBehaviour {
             }
         }
 
-        if (meshBounds != null)
-        {
-            for (int boundsIndex = 0; boundsIndex < meshBounds.Count; boundsIndex++)
-            {
-                for (int i = 0; i < meshBounds[boundsIndex].GetSubBounds().Length; i++)
-                {
-                    Gizmos.DrawWireCube(meshBounds[boundsIndex].GetSubBounds()[i].subBound.center, meshBounds[boundsIndex].GetSubBounds()[i].subBound.size);
-                }
-            }
-            
-        }
-
         if (loadedBounds != null)
         {
-            //Debug.Log("Loaded bound is not null");
-            //Debug.Log("length of subBounds: " + loadedBound.GetSubBounds().Length);
-            //Gizmos.DrawWireCube(loadedBound.GetBound().center, loadedBound.GetBound().size);
-            //for (int boundsIndex = 0; boundsIndex < loadedBounds.Count; boundsIndex++)
-            //{
-            //for (int i = 0; i < loadedBounds/*[boundsIndex]*/.GetSubBounds().Length; i++)
-            //{
-                Gizmos.DrawWireCube(loadedBounds/*[boundsIndex]*/.GetSubBounds()[0].subBound.center, loadedBounds/*[boundsIndex]*/.GetSubBounds()[0].subBound.size);
-            //}
-            //}
+            for (int i = 0; i < loadedBounds.GetSubBounds().Length; i++)
+            {
+                Gizmos.DrawWireCube(loadedBounds.GetSubBounds()[i].subBound.center, loadedBounds.GetSubBounds()[i].subBound.size);
+            }
         }
     }
 
     public void Test()
     {
-        meshBounds = new List<BoundingBoxSystem>();
-        int count = 0;
-        foreach (GameObject room in rs.GetList())
-        {
-            //if (room.GetComponent<MeshFilter>().mesh.vertexCount == 0)
-                //continue;
-            specificMeshes.Add(room);
-            meshBounds.Add(new BoundingBoxSystem(specificMeshes, x_mesh, y_mesh, z_mesh, room.transform, room.GetComponent<MeshFilter>().mesh));
-            meshBounds[count].SplitBounds(true);
-            meshBounds[count].SplitMesh();
-            specificMeshes.Clear();
-            count++;
-        }
+        areaBound = new BoundingBoxSystem(rs.GetList(), x_area, y_area, z_area);
+        areaBound.SplitBounds(true);
+        areaBound.SplitMesh();
     }
 
     public void Load()
