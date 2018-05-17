@@ -141,7 +141,7 @@ public class BoundingBoxSystem {
         return new Bounds(center, new Vector3(sizeX, sizeY, sizeZ));
     }
 
-    public void SplitBounds(bool isNormalBounds)
+    public void SplitBounds()
     {
         float sizeX = (bounds.max.x - bounds.min.x) / xDirCount;
         float sizeY = (bounds.max.y - bounds.min.y) / yDirCount;
@@ -160,10 +160,7 @@ public class BoundingBoxSystem {
                 for (int k = 0; k < xDirCount; k++)
                 {
                     subCenter = new Vector3(xStartPoint + sizeX / 2, yStartPoint + sizeY / 2, zStartPoint + sizeZ / 2);
-                    if (isNormalBounds)
-                        subBounds[index++] = new BoundHolder(subCenter, subSize);
-                    //else
-                    //    subBounds[index++] = new BoundHolder(subCenter, subSize);
+                    subBounds[index++] = new BoundHolder(subCenter, subSize);
                     xStartPoint += sizeX;
                 }
                 xStartPoint = bounds.min.x;
@@ -299,29 +296,6 @@ public class BoundingBoxSystem {
 
         return subBounds[indexOfSubBounds];
     }
-
-    //private void putTrianglesIntoBoundingBox(Mesh m)
-    //{
-    //    int vertexIndex = 0;
-    //    BoundHolder b = null;
-    //    int[] triangle = new int[3];
-
-    //    Vector3[] verticesCopy = m.vertices;
-    //    Vector3[] normalsCopy = m.normals;
-    //    Color[] colorsCopy = m.colors;
-    //    int[] trianglesCopy = m.triangles;
-
-    //    for (int index = 0; index < trianglesCopy.Length; index += 3)
-    //    {
-    //        vertexIndex = trianglesCopy[0 + index];
-    //        Vector3 worldPoint = trans.TransformPoint(verticesCopy[vertexIndex]);
-    //        b = FindBoundingBox(worldPoint);
-    //        triangle[0] = trianglesCopy[0 + index];
-    //        triangle[1] = trianglesCopy[1 + index];
-    //        triangle[2] = trianglesCopy[2 + index];
-    //        b.AddTriangle(triangle, verticesCopy, normalsCopy, colorsCopy, trianglesCopy);
-    //    }
-    //}
 
     private void putTrianglesIntoBoundingBox(Mesh[] meshes, Transform[] transforms)
     {

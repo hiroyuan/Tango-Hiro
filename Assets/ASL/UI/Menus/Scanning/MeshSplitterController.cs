@@ -16,27 +16,27 @@ public class MeshSplitterController : MonoBehaviour {
     public BoundingBoxSystem loadedBounds;
     public List<GameObject> specificMeshes;
     public GameObject indicator;
-//    public Transform trans;
     public LoadedMeshHolder[] loadedMeshes;
 
-    public int x_area = 5;
+    public int x_area = 1;
     public int y_area = 1;
-    public int z_area = 10;
+    public int z_area = 1;
+    public bool keepMeshes = false;
 
+    private bool splitTriggered = false;
 
     private RoomSaveLogic rs;
 
     // Use this for initialization
     void Start ()
     {
-        //rs = (RoomSaveLogic)EditorWindow.GetWindow(typeof(RoomSaveLogic));
         getRoomSaveLogic();
 
         specificMeshes = new List<GameObject>();
         indicator = GameObject.Find("IndicatorObject");
 
-        //areaBound = new BoundingBoxSystem(rs.GetList(), x_area, y_area, z_area);
-        //areaBound.SplitBounds(true);
+        areaBound = new BoundingBoxSystem(rs.GetList(), x_area, y_area, z_area);
+        areaBound.SplitBounds();
     }
 
     private void getRoomSaveLogic()
@@ -47,6 +47,12 @@ public class MeshSplitterController : MonoBehaviour {
 	// Update is called once per frame
 	void Update ()
     {
+        if (!splitTriggered)
+        {
+            areaBound = new BoundingBoxSystem(rs.GetList(), x_area, y_area, z_area);
+            areaBound.SplitBounds();
+        }
+
         if (loadedBounds != null)
         {
             loadedBounds.ActivateSubBoundsByIndicator(indicator);
@@ -72,7 +78,7 @@ public class MeshSplitterController : MonoBehaviour {
                 }
                 else
                 {
-                    if (GameObject.Find("MeshInBoundingBox_" + i) != null)
+                    if (!keepMeshes && GameObject.Find("MeshInBoundingBox_" + i) != null)
                     {
                         GameObject obj = GameObject.Find("MeshInBoundingBox_" + i);
                         Destroy(obj);
@@ -84,7 +90,7 @@ public class MeshSplitterController : MonoBehaviour {
 
     void OnDrawGizmos()
     {
-        if (areaBound != null)
+        if (areaBound != null && loadedBounds == null)
         {
             for (int i = 0; i < areaBound.GetSubBounds().Length; i++)
             {
@@ -103,8 +109,9 @@ public class MeshSplitterController : MonoBehaviour {
 
     public void Test()
     {
+        splitTriggered = true;
         areaBound = new BoundingBoxSystem(rs.GetList(), x_area, y_area, z_area);
-        areaBound.SplitBounds(true);
+        areaBound.SplitBounds();
         areaBound.SplitMesh();
     }
 

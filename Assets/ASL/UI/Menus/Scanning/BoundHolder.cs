@@ -6,12 +6,6 @@ using System;
 
 public class BoundHolder {
     public Bounds subBound;
-    //private List<Vector3> partialVertices;
-    //private List<Vector3> partialNormals;
-    //private List<Color> partialColor;
-    //private List<Vector2> partialUVs;
-    //private List<int> newTriangles;
-    //private VertexLookUp map;
     private bool isActive;
 
     public Mesh[] meshInBBox;

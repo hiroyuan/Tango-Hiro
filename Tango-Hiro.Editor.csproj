@@ -309,6 +309,7 @@
     <None Include="Assets\ASL\Resources\Rooms\Room2\Room2Orientation.txt" />
     <None Include="Assets\ASL\Resources\Rooms\TangoDefault\ScannerPlatform.txt" />
     <None Include="Assets\ASL\Resources\Rooms\UW1_260\ScannerPlatform.txt" />
+    <None Include="Assets\ASL\Resources\Rooms\UW1_260M_Test1\ScannerPlatform.txt" />
     <None Include="Assets\ASL\Resources\Rooms\UW1_302\ScannerPlatform.txt" />
     <None Include="Assets\ASL\Room_Texture\Resources\_Shaders\MyRoomShader.shader" />
     <None Include="Assets\Plugins\Android\AndroidManifest.xml" />
