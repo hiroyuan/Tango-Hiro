@@ -701,6 +701,7 @@
      <Compile Include="Assets\ASL\UI\Menus\Scanning\Controller.cs" />
      <Compile Include="Assets\ASL\UI\Menus\Scanning\LoadedMeshHolder.cs" />
      <Compile Include="Assets\ASL\UI\Menus\Scanning\MeshHolder.cs" />
+     <Compile Include="Assets\ASL\UI\Menus\Scanning\MeshInBBox.cs" />
      <Compile Include="Assets\ASL\UI\Menus\Scanning\MeshSplitterController.cs" />
      <Compile Include="Assets\ASL\UI\Menus\Scanning\RoomSaveEditorWindow.cs" />
      <Compile Include="Assets\ASL\UI\Menus\Scanning\VertexLookUp.cs" />
@@ -788,6 +789,7 @@
      <None Include="Assets\ASL\3rd Party Libraries\OVR\Shaders\OVRColorRampAlpha.shader" />
      <None Include="Assets\ASL\3rd Party Libraries\Tango\DynamicShadowProjector\Shaders\Projector\Dynamic\LightxShadowWithLinearFalloff.shader" />
      <None Include="Assets\ASL\3rd Party Libraries\Tango\DynamicShadowProjector\Shaders\Shadow\ShadowTransparent.shader" />
+     <None Include="Assets\ASL\Resources\Rooms\UW1_260M_Test1\ScannerPlatform.txt" />
      <None Include="Assets\ASL\3rd Party Libraries\Tango\TangoPrefabs\Shaders\ARPostProcess.shader" />
      <None Include="Assets\ASL\3rd Party Libraries\Tango\DynamicShadowProjector\Shaders\Shadow\ShadowOpaque.shader" />
      <None Include="Assets\ASL\3rd Party Libraries\Tango\TangoSDK\Examples\ExperimentalMeshBuilderWithPhysics\Shader\UnlitColor.shader" />
@@ -854,7 +856,6 @@
      <None Include="Assets\ASL\3rd Party Libraries\Tango\DynamicShadowProjector\Shaders\Blit\EraseShadow.shader" />
      <None Include="Assets\ASL\3rd Party Libraries\OVR\Resources\Underlay Impostor.shader" />
      <None Include="Assets\ASL\3rd Party Libraries\Tango\DynamicShadowProjector\Shaders\Blit\Downsample.cginc" />
-     <None Include="Assets\ASL\Resources\Rooms\Test\ScannerPlatform.txt" />
      <None Include="Assets\ASL\Photon Unity Networking\Demos\DemoRockPaperScissors\Assets\OpenSans\Apache License.txt" />
      <None Include="Assets\ASL\Resources\Rooms\Room2\Room2Orientation.txt" />
      <None Include="Assets\ASL\Resources\Rooms\TangoDefault\ScannerPlatform.txt" />
