@@ -66,9 +66,9 @@ namespace ASL.UI.Menus.Scanning
                 if (GUI.Button(new Rect(10, 160, position.width - 20, 20), "Unload Selected Room"))
                     roomSaveLogic_m.UnloadRoom(directoryInfoList[selected]);
 
-                if (GUI.Button(new Rect(10, 185, position.width - 20, 20), "Select Mesh and split"))
+                if (GUI.Button(new Rect(10, 185, position.width - 20, 20), "Split by BBox"))
                 {
-                    ms.Test();
+                    ms.SplitMeshByBBox();
                 }
                 if (GUI.Button(new Rect(10, 210, position.width - 20, 20), "Load BBox"))
                 {

@@ -7,6 +7,7 @@ using System;
 public class BoundHolder {
     public Bounds subBound;
     private bool isActive;
+    private bool preLoadMeshes;
 
     public Mesh[] meshInBBox;
     public Dictionary<int, MeshInBBox> meshes = new Dictionary<int, MeshInBBox>();
@@ -15,12 +16,14 @@ public class BoundHolder {
     public BoundHolder()
     {
         isActive = false;
+        preLoadMeshes = false;
     }
 
     public BoundHolder(Vector3 center, Vector3 size)
     {
         subBound = new Bounds(center, size);
         isActive = false;
+        preLoadMeshes = false;
     }
 
     public bool GetStatus()
@@ -31,6 +34,16 @@ public class BoundHolder {
     public void SetStatus(bool status)
     {
         isActive = status;
+    }
+
+    public bool GetPreLoadStatus()
+    {
+        return preLoadMeshes;
+    }
+
+    public void SetPreLoadStatus(bool p)
+    {
+        preLoadMeshes = p;
     }
 
     public bool CheckIntersects(Vector3 point)
